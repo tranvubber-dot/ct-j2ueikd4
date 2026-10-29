@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0906">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Chi Tiêu">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg">
@@ -681,13 +684,6 @@ function finish() {
 // Mở từ màn hình chính iPhone, nhận giọng của trình duyệt hay bị chặn → dùng 🎤 bàn phím (đọc chính tả), cũng miễn phí
 const STANDALONE = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 const NOSR = 'chitieu.nosr' + (STANDALONE ? '.app' : '');
-// Mở dạng "ứng dụng web" trên iPhone thì micro bị chặn → chỉ cách thêm lại đúng
-if (STANDALONE && /iPhone|iPad/.test(navigator.userAgent)) setTimeout(() => {
-  const d = document.createElement('div');
-  d.className = 'glass'; d.style.cssText = 'padding:12px 14px;margin-bottom:14px;font-size:13.5px;line-height:1.5;border-color:rgba(246,196,83,.45)';
-  d.innerHTML = '🎤 <b>Muốn bấm micro nói được:</b> xoá biểu tượng này, mở lại trang bằng Safari → Chia sẻ → Thêm vào Màn hình chính → <b>TẮT “Mở dưới dạng ứng dụng web”</b> → Thêm. Dữ liệu cũ: đăng nhập Google Sheet ở đây trước để mang sang.';
-  document.querySelector('.grid').before(d);
-}, 50);
 function keyboardMode(msg) {
   setLive(msg || 'Chạm <b>🎤 trên bàn phím</b> rồi nói, ví dụ “phở 50 nghìn”, xong bấm <b>Ghi</b>.');
   $('#typed').focus();
@@ -731,7 +727,77 @@ function startMic() {
   setTimeout(() => { if (!started && !done) { done = true; try { rec && rec.abort(); } catch {} rec = null; micOff(); if (STANDALONE) srBroken(); keyboardMode('Micro không phản hồi — chạm <b>🎤 trên bàn phím</b> để nói nhé.'); } }, 4000);
 }
 // Bấm lần nữa khi đang nghe = chốt ngay
-mic.onclick = () => { if (listening || (rec && !done)) finish(); else startMic(); };
+// ===== GHI ÂM → MÁY NGHE WHISPER (khi mở dạng ứng dụng, iPhone chặn nhận giọng của trình duyệt) =====
+const STT_URL = 'https://chi-tieu-nghe.vtcom-jdy2qkpq.workers.dev';
+const useRec = () => STANDALONE || !SR;
+let recSt = null;
+function encodeWav(f32, rate) {
+  const R16 = 16000, n = Math.floor(f32.length * R16 / rate), pcm = new Int16Array(n);
+  for (let i = 0; i < n; i++) {   // đổi về 16 kHz (trung bình các mẫu trong khoảng)
+    const a = Math.floor(i * rate / R16), b = Math.max(a + 1, Math.floor((i + 1) * rate / R16));
+    let v = 0; for (let j = a; j < b && j < f32.length; j++) v += f32[j];
+    v /= (b - a); pcm[i] = Math.max(-1, Math.min(1, v)) * 0x7fff;
+  }
+  const buf = new ArrayBuffer(44 + n * 2), d = new DataView(buf), w = (o, t) => [...t].forEach((c, i) => d.setUint8(o + i, c.charCodeAt(0)));
+  w(0, 'RIFF'); d.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); d.setUint32(16, 16, true); d.setUint16(20, 1, true); d.setUint16(22, 1, true);
+  d.setUint32(24, R16, true); d.setUint32(28, R16 * 2, true); d.setUint16(32, 2, true); d.setUint16(34, 16, true); w(36, 'data'); d.setUint32(40, n * 2, true);
+  new Int16Array(buf, 44).set(pcm);
+  return new Blob([buf], { type: 'audio/wav' });
+}
+async function startRec() {
+  if (!navigator.onLine) { keyboardMode('Đang mất mạng — chạm <b>🎤 trên bàn phím</b> để nói nhé.'); return; }
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
+  catch (e) { keyboardMode('Chưa cho phép micro (Cài đặt → Safari → Micrô). Tạm thời chạm <b>🎤 trên bàn phím</b> để nói.'); return; }
+  const ac = new (window.AudioContext || window.webkitAudioContext)();
+  try { await ac.resume(); } catch {}
+  const src = ac.createMediaStreamSource(stream), proc = ac.createScriptProcessor(4096, 1, 1);
+  const chunks = [], t0 = performance.now();
+  let floor = 0, nFloor = 0, heard = false, quiet = 0, ended = false;
+  const stop = () => {
+    if (ended) return; ended = true; recSt = null;
+    try { proc.disconnect(); src.disconnect(); } catch {}
+    stream.getTracks().forEach(t => t.stop());
+    const rate = ac.sampleRate; ac.close().catch(() => {});
+    listening = false; mic.classList.remove('on'); $('#lv').style.setProperty('--lv', 1);
+    if (!heard) { setLive('Chưa nghe thấy gì, bấm nói lại nhé.', true); return; }
+    const all = new Float32Array(chunks.reduce((t, c) => t + c.length, 0));
+    let o = 0; for (const c of chunks) { all.set(c, o); o += c.length; }
+    sendAudio(encodeWav(all, rate));
+  };
+  proc.onaudioprocess = e => {
+    if (ended) return;
+    const d = e.inputBuffer.getChannelData(0); chunks.push(new Float32Array(d));
+    let sq = 0; for (let i = 0; i < d.length; i += 4) sq += d[i] * d[i];
+    const rms = Math.sqrt(sq / (d.length / 4)), now = performance.now();
+    if (now - t0 < 350) { floor += rms; nFloor++; return; }   // đo tiếng ồn nền lúc đầu
+    const thr = Math.max(0.012, (floor / Math.max(1, nFloor)) * 2.5);
+    $('#lv').style.setProperty('--lv', 1 + Math.min(.6, rms * 6));
+    if (rms > thr) { heard = true; quiet = 0; }
+    else if (heard) { quiet ||= now; if (now - quiet > 1300) stop(); }   // im 1,3 giây là chốt
+    if (now - t0 > 15000 || (!heard && now - t0 > 7000)) stop();
+  };
+  src.connect(proc); proc.connect(ac.destination);
+  recSt = { stop };
+  listening = true; mic.classList.add('on'); setLive('Đang nghe…'); if (navigator.vibrate) navigator.vibrate(15);
+}
+async function sendAudio(blob) {
+  setLive('Đang nhận dạng…');
+  try {
+    const r = await fetch(STT_URL, { method: 'POST', headers: { 'Content-Type': 'audio/wav' }, body: blob });
+    const j = await r.json().catch(() => ({}));
+    let t = (j.text || '').trim();
+    if (/Ghi chi tiêu bằng tiếng Việt/i.test(t)) t = '';   // Whisper đọc nhầm câu gợi ý khi không có tiếng
+    if (!r.ok || !t) { setLive(j.error ? 'Máy nghe lỗi: ' + esc(j.error) + ' — chạm 🎤 trên bàn phím để nói.' : 'Chưa nghe rõ, bấm nói lại nhé.', true); return; }
+    handleText([t]);
+  } catch (e) { setLive('Không gửi được tiếng nói (mạng?) — chạm <b>🎤 trên bàn phím</b> để nói.', true); }
+}
+
+mic.onclick = () => {
+  if (recSt) { recSt.stop(); return; }
+  if (listening || (rec && !done)) { finish(); return; }
+  if (useRec()) startRec(); else startMic();
+};
 
 // Vòng nhịp theo âm lượng (nếu được phép micro riêng)
 async function startMeter() {
@@ -1295,7 +1361,7 @@ function toast(msg, act, fn) {
 }
 
 // Điện thoại hay giữ bản cũ trong bộ nhớ đệm → hỏi máy chủ, có bản mới thì tải lại 1 lần
-const VER = '5';
+const VER = '6';
 $('#verLine').textContent = 'bản ' + VER;
 fetch('./?nocache=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
   const m = t.match(/const VER = '(\d+)'/);

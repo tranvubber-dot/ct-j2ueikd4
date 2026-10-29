@@ -1,0 +1,7 @@
+name = "chi-tieu-nghe"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+# Mô hình chuyển giọng nói Whisper của Cloudflare (gói miễn phí 10.000 neuron/ngày, hết thì báo lỗi chứ không trừ tiền)
+[ai]
+binding = "AI"
