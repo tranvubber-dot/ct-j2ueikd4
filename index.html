@@ -424,7 +424,12 @@ const VN = (() => {
     if (a.t === 'n' && b && b.t === 'C') return a.v * 10 + (c && c.t === 'R' ? 5 : 0);
     if (a.t === 'C') return 10 + (b && b.t === 'R' ? 5 : 0);
     if (a.t === 'n' && b && b.t === 'n' && !a.digit && !b.digit) return a.v === 10 ? 10 + b.v : a.v * 10 + b.v;
-    if (a.t === 'n') return a.v + (b && b.t === 'R' ? .5 : 0);
+    if (a.t === 'n' && b && b.t === 'R') {
+      // "200 rưỡi" = 250, "20 rưỡi" = 25, "2 rưỡi" = 2,5: rưỡi = nửa đơn vị đầu của số tròn
+      const u = a.v >= 10 && Number.isInteger(a.v) ? 10 ** Math.floor(Math.log10(a.v)) : 1;
+      return a.v + (a.v % u === 0 ? u / 2 : .5);
+    }
+    if (a.t === 'n') return a.v;
     return 0;
   }
 
@@ -787,7 +792,7 @@ async function startRec() {
   try { await ac.resume(); } catch {}
   const src = ac.createMediaStreamSource(stream), proc = ac.createScriptProcessor(4096, 1, 1);
   const chunks = [], loud = [], t0 = performance.now();
-  let floor = 0, nFloor = 0, heard = false, quiet = 0, ended = false;
+  let floor = 1, heard = false, quiet = 0, ended = false, peak = 0;
   const stop = () => {
     if (ended) return; ended = true; recSt = null;
     try { proc.disconnect(); src.disconnect(); } catch {}
@@ -795,9 +800,9 @@ async function startRec() {
     const rate = ac.sampleRate; ac.close().catch(() => {});
     listening = false; mic.classList.remove('on'); $('#lv').style.setProperty('--lv', 1);
     if (!heard) { setLive('Chưa nghe thấy gì, bấm nói lại nhé.', true); return; }
-    // Cắt im lặng đầu/cuối (giữ đệm ~0,25 giây) → gửi ít hơn, nhận chữ nhanh hơn
-    const first = Math.max(0, loud.indexOf(1) - 3), last = Math.min(chunks.length, loud.lastIndexOf(1) + 4);
-    const keep = chunks.slice(first, last);
+    // Giữ nguyên từ đầu, chỉ bỏ khoảng im lặng thừa ở cuối (giữ đệm ~0,5 giây)
+    const last = Math.min(chunks.length, loud.lastIndexOf(1) + 6);
+    const keep = chunks.slice(0, last);
     const all = new Float32Array(keep.reduce((t, c) => t + c.length, 0));
     let o = 0; for (const c of keep) { all.set(c, o); o += c.length; }
     sendAudio(encodeWav(all, rate));
@@ -807,11 +812,13 @@ async function startRec() {
     const d = e.inputBuffer.getChannelData(0); chunks.push(new Float32Array(d)); loud.push(0);
     let sq = 0; for (let i = 0; i < d.length; i += 4) sq += d[i] * d[i];
     const rms = Math.sqrt(sq / (d.length / 4)), now = performance.now();
-    if (now - t0 < 350) { floor += rms; nFloor++; return; }   // đo tiếng ồn nền lúc đầu
-    const thr = Math.max(0.012, (floor / Math.max(1, nFloor)) * 2.5);
+    // Ngưỡng tiếng nói: lấy khúc YÊN NHẤT làm tiếng ồn nền (anh nói ngay khi bấm cũng không sao), kẹp trong khoảng hợp lý
+    floor = Math.min(floor, rms); peak = Math.max(peak, rms);
+    const thr = Math.min(0.03, Math.max(0.006, floor * 3, peak * 0.12));
+    if (now - t0 < 250) return;
     $('#lv').style.setProperty('--lv', 1 + Math.min(.6, rms * 6));
     if (rms > thr) { heard = true; quiet = 0; loud[loud.length - 1] = 1; }
-    else if (heard) { quiet ||= now; if (now - quiet > 1000) stop(); }   // im 1 giây là chốt
+    else if (heard) { quiet ||= now; if (now - quiet > 1200) stop(); }   // im 1,2 giây là chốt
     if (now - t0 > 15000 || (!heard && now - t0 > 7000)) stop();
   };
   src.connect(proc); proc.connect(ac.destination);
@@ -824,7 +831,8 @@ async function sendAudio(blob) {
     const r = await fetch(STT_URL, { method: 'POST', headers: { 'Content-Type': 'audio/wav' }, body: blob });
     const j = await r.json().catch(() => ({}));
     let t = (j.text || '').trim();
-    if (/Ghi chi tiêu bằng tiếng Việt/i.test(t)) t = '';   // Whisper đọc nhầm câu gợi ý khi không có tiếng
+    // Whisper hay bịa các câu này khi tiếng nhỏ hoặc ồn → coi như chưa nghe rõ
+    if (/Ghi chi tiêu bằng tiếng Việt|cảm ơn các bạn đã (theo dõi|xem)|hẹn gặp lại các bạn|đăng ký kênh|subscribe|like và share|Ghiền Mì Gõ/i.test(t)) t = '';
     if (!r.ok || !t) { setLive(j.error ? 'Máy nghe lỗi: ' + esc(j.error) + ' — chạm 🎤 trên bàn phím để nói.' : 'Chưa nghe rõ, bấm nói lại nhé.', true); return; }
     mic.classList.remove('think');
     handleText([t]);
@@ -1435,7 +1443,7 @@ function toast(msg, act, fn) {
 }
 
 // Điện thoại hay giữ bản cũ trong bộ nhớ đệm → hỏi máy chủ, có bản mới thì tải lại 1 lần
-const VER = '9';
+const VER = '10';
 $('#verLine').textContent = 'bản ' + VER;
 fetch('./?nocache=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
   const m = t.match(/const VER = '(\d+)'/);
