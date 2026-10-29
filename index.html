@@ -4,9 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0906">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Chi Tiêu">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg">
@@ -217,6 +214,13 @@
   .gsbtn.ok i { background:#34d399; } .gsbtn.wait i { background:var(--a1); } .gsbtn.err i { background:#ff5f7e; }
   .gsbtn.busy svg { animation:spin 1s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
+  .gsline { display:flex; align-items:center; gap:10px; width:100%; padding:11px 14px; margin-bottom:14px; text-align:left; font-size:14px; }
+  .gsline .ic { font-size:18px; }
+  .gsline .tx { flex:1; min-width:0; color:var(--mute); }
+  .gsline .tx b { color:var(--text); }
+  .gsline .go { color:var(--a1); font-weight:700; white-space:nowrap; }
+  .gsline[hidden] { display:none; }
+  .gsline.err { border-color:rgba(255,95,126,.5); } .gsline.ok { border-color:rgba(52,211,153,.35); }
   .gsbox { padding:14px 4px 6px; border-bottom:1px solid var(--line); }
   .gsbox .st { font-size:13.5px; color:var(--mute); margin:4px 0 10px; }
   .gsbox .row2 { display:flex; gap:8px; flex-wrap:wrap; }
@@ -239,6 +243,7 @@
   </header>
 
   <div class="tabs" id="tabs"><button data-t="chi" class="on">💸 Chi tiêu</button><button data-t="no">🤝 Sổ nợ <span class="bd" id="noBadge"></span></button></div>
+  <button class="glass gsline" id="gsLine" hidden><span class="ic">📗</span><span class="tx" id="gsLineTx"></span><span class="go" id="gsLineGo"></span></button>
   <div class="grid">
     <section class="left">
       <div class="hero2 no-only"><div class="glass"><div class="lbl">Mình đang nợ</div><div class="v owe" id="oweTotal">0đ</div></div><div class="glass"><div class="lbl">Người ta nợ mình</div><div class="v owed" id="owedTotal">0đ</div></div></div>
@@ -676,6 +681,13 @@ function finish() {
 // Mở từ màn hình chính iPhone, nhận giọng của trình duyệt hay bị chặn → dùng 🎤 bàn phím (đọc chính tả), cũng miễn phí
 const STANDALONE = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 const NOSR = 'chitieu.nosr' + (STANDALONE ? '.app' : '');
+// Mở dạng "ứng dụng web" trên iPhone thì micro bị chặn → chỉ cách thêm lại đúng
+if (STANDALONE && /iPhone|iPad/.test(navigator.userAgent)) setTimeout(() => {
+  const d = document.createElement('div');
+  d.className = 'glass'; d.style.cssText = 'padding:12px 14px;margin-bottom:14px;font-size:13.5px;line-height:1.5;border-color:rgba(246,196,83,.45)';
+  d.innerHTML = '🎤 <b>Muốn bấm micro nói được:</b> xoá biểu tượng này, mở lại trang bằng Safari → Chia sẻ → Thêm vào Màn hình chính → <b>TẮT “Mở dưới dạng ứng dụng web”</b> → Thêm. Dữ liệu cũ: đăng nhập Google Sheet ở đây trước để mang sang.';
+  document.querySelector('.grid').before(d);
+}, 50);
 function keyboardMode(msg) {
   setLive(msg || 'Chạm <b>🎤 trên bàn phím</b> rồi nói, ví dụ “phở 50 nghìn”, xong bấm <b>Ghi</b>.');
   $('#typed').focus();
@@ -1215,8 +1227,10 @@ async function gSync(first) {
     if (first || !gs.pulled) { const n = await gPull(); gs.pulled = true; if (n) toast(`Đã lấy về ${n} dòng từ Google Sheet`); }
     gs.chi = await gPut(GNAME.chi, gs.chi, csvChi());
     gs.no = await gPut(GNAME.no, gs.no, csvNo());
+    const firstOk = !gs.at;
     gs.at = Date.now(); gs.dirty = false;
-  } catch (e) { gs.err = e.login ? '' : e.message + (e.body ? ' — ' + e.body.replace(/\s+/g, ' ').slice(0, 140) : ''); }
+    if (firstOk) toast('✓ Đã kết nối — dữ liệu đã vào Google Sheet');
+  } catch (e) { gs.err = e.login ? '' : e.message + (e.body ? ' — ' + e.body.replace(/\s+/g, ' ').slice(0, 140) : ''); if (gs.err) toast('Google Sheet lỗi: ' + e.message); }
   gBusy = false; saveGs(); paintGs();
 }
 function paintGs() {
@@ -1233,6 +1247,12 @@ function paintGs() {
     acts = [['sync', 'Lưu ngay', 'main']].concat(gs.chi ? [['open', 'Mở bảng tính', 'ghost']] : [], [['out', 'Ngắt', 'ghost']]);
   }
   $('#gsSt').textContent = st;
+  // Dòng trạng thái ngoài màn hình chính — nhìn là biết đã lưu chưa
+  const L = $('#gsLine');
+  L.hidden = !gs.on;
+  L.classList.toggle('ok', b.classList.contains('ok')); L.classList.toggle('err', b.classList.contains('err'));
+  $('#gsLineTx').innerHTML = !gs.on ? '' : gBusy ? '<b>Đang lưu lên Google Sheet…</b>' : gs.err ? '<b>Google Sheet lỗi</b> — chạm để xem' : (!tokOk() && gs.dirty) ? '<b>Chưa lưu</b> — phiên Google hết hạn' : gs.dirty ? 'Sắp lưu lên Google Sheet…' : gs.at ? '<b>Đã lưu Google Sheet</b> · ' + new Date(gs.at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '<b>Đang kết nối Google…</b>';
+  $('#gsLineGo').textContent = !gs.on ? '' : gs.err ? 'Xem' : (!tokOk() && gs.dirty) ? 'Đăng nhập' : gs.chi && !gs.dirty ? 'Mở bảng ›' : '';
   $('#gsActs').innerHTML = acts.map(([k, l, c]) => `<button class="btn ${c}" data-g="${k}">${l}</button>`).join('');
 }
 $('#gsActs').onclick = e => {
@@ -1241,6 +1261,11 @@ $('#gsActs').onclick = e => {
   else if (k === 'sync') { if (tokOk()) gSync(); else gAuth(); }
   else if (k === 'open') window.open('https://docs.google.com/spreadsheets/d/' + gs.chi, '_blank');
   else if (k === 'out') { gs = { on: false }; gTok = {}; saveGs(); try { localStorage.removeItem('chitieu.gtok'); } catch {} paintGs(); toast('Đã ngắt — dữ liệu trên máy vẫn còn'); }
+};
+$('#gsLine').onclick = () => {
+  if (gs.err) { openSheet($('#menu')); return; }
+  if (!tokOk() && gs.dirty) { loadGsi().then(gAuth).catch(() => gLogin()); return; }
+  if (gs.chi) window.open('https://docs.google.com/spreadsheets/d/' + gs.chi, '_blank'); else openSheet($('#menu'));
 };
 $('#gsBtn').onclick = () => { loadGsi().catch(() => {}); if (gs.on && gs.dirty && !tokOk() && !gBusy && window.google?.accounts?.oauth2) gAuth(); else openSheet($('#menu')); };
 $('#menuBtn').addEventListener('click', () => loadGsi().catch(() => {}));
@@ -1270,7 +1295,7 @@ function toast(msg, act, fn) {
 }
 
 // Điện thoại hay giữ bản cũ trong bộ nhớ đệm → hỏi máy chủ, có bản mới thì tải lại 1 lần
-const VER = '4';
+const VER = '5';
 $('#verLine').textContent = 'bản ' + VER;
 fetch('./?nocache=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
   const m = t.match(/const VER = '(\d+)'/);
