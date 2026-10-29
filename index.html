@@ -1222,6 +1222,8 @@ let gsiP = null;
 const loadGsi = () => gsiP ||= new Promise((res, rej) => { if (window.google?.accounts?.oauth2) return res(); const sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; sc.onload = res; sc.onerror = () => { gsiP = null; rej(); }; document.head.appendChild(sc); });
 let tokClient = null;
 function gAuth() {
+  // Dạng ứng dụng toàn màn hình: cửa sổ bật lên không trả kết quả về được → chuyển trang Google rồi quay về
+  if (STANDALONE) { gLogin(); return; }
   if (!window.google?.accounts?.oauth2) { loadGsi().then(() => toast('Chạm lại để đăng nhập Google')).catch(() => toast('Không tải được Google — kiểm tra mạng')); return; }
   tokClient ||= google.accounts.oauth2.initTokenClient({
     client_id: GCID, scope: GSCOPE,
@@ -1364,7 +1366,7 @@ function toast(msg, act, fn) {
 }
 
 // Điện thoại hay giữ bản cũ trong bộ nhớ đệm → hỏi máy chủ, có bản mới thì tải lại 1 lần
-const VER = '7';
+const VER = '8';
 $('#verLine').textContent = 'bản ' + VER;
 fetch('./?nocache=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
   const m = t.match(/const VER = '(\d+)'/);
