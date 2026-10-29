@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#07080c">
+<meta name="theme-color" content="#0b0906">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,12 +13,12 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <title>Chi Tiêu Giọng Nói</title>
 <style>
   :root {
-    --bg:#07080c; --glass:rgba(255,255,255,.055); --glass2:rgba(255,255,255,.1); --line:rgba(255,255,255,.09);
-    --text:#f4f5f8; --mute:#9aa1b2; --dim:#6b7283; --a1:#34d399; --a2:#22d3ee; --a3:#a78bfa; --warn:#ff9aa8;
+    --bg:#0b0906; --glass:rgba(255,255,255,.055); --glass2:rgba(255,255,255,.1); --line:rgba(255,255,255,.09);
+    --text:#f4f5f8; --mute:#9aa1b2; --dim:#6b7283; --a1:#f6c453; --a2:#ffe29a; --a3:#d4912a; --warn:#ff9aa8;
     --grad:linear-gradient(120deg, var(--a1), var(--a2) 55%, var(--a3));
   }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -26,8 +26,8 @@
   body { margin:0; min-height:100vh; color:var(--text);
          font:15px/1.45 'Be Vietnam Pro', -apple-system, system-ui, sans-serif; overflow-x:hidden;
          padding:max(14px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom)); }
-  .aura { position:fixed; inset:-20vmax; z-index:-1; pointer-events:none; filter:blur(70px); opacity:.28; }
-  .aura i { position:absolute; width:55vmax; height:55vmax; border-radius:50%; mix-blend-mode:screen; }
+  .aura { position:fixed; inset:-20vmax; z-index:-1; pointer-events:none; opacity:.22; }
+  .aura i { position:absolute; width:55vmax; height:55vmax; border-radius:50%; will-change:transform; }
   .aura i:nth-child(1) { background:radial-gradient(circle, var(--a1), transparent 62%); left:0; top:0; animation:drift1 22s ease-in-out infinite alternate; }
   .aura i:nth-child(2) { background:radial-gradient(circle, var(--a3), transparent 62%); right:0; top:10%; animation:drift2 26s ease-in-out infinite alternate; }
   .aura i:nth-child(3) { background:radial-gradient(circle, var(--a2), transparent 62%); left:20%; bottom:0; opacity:.6; animation:drift3 30s ease-in-out infinite alternate; }
@@ -40,7 +40,7 @@
   .wrap { max-width:1180px; margin:0 auto; }
   header { display:flex; align-items:center; gap:12px; margin:6px 0 16px; }
   .logo { width:42px; height:42px; border-radius:13px; background:var(--grad); display:grid; place-items:center; flex:none;
-          box-shadow:0 8px 24px -6px rgba(52,211,153,.6); }
+          box-shadow:0 8px 24px -6px rgba(246,196,83,.6); }
   .logo svg { width:20px; }
   header h1 { margin:0; font-size:21px; font-weight:800; letter-spacing:-.02em; line-height:1.1; }
   header h1 b { background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
@@ -50,7 +50,7 @@
   .icbtn { width:40px; height:40px; border-radius:12px; background:var(--glass); border:1px solid var(--line); display:grid; place-items:center; flex:none; }
   .icbtn svg { width:18px; color:var(--mute); }
 
-  .glass { background:var(--glass); border:1px solid var(--line); border-radius:22px; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+  .glass { background:rgba(22,24,32,.72); border:1px solid var(--line); border-radius:22px; }
   .grid { display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
   .grid > section { min-width:0; }
   @media (min-width:900px) {
@@ -61,6 +61,8 @@
   /* Tổng hôm nay */
   .hero { padding:16px 18px; display:flex; align-items:flex-end; gap:12px; }
   .hero .lbl { color:var(--mute); font-size:12.5px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
+  .hero .big, .tot .v { background:linear-gradient(180deg,#fff3c9,#f6c453 60%,#d4912a); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero .big small, .tot .v small { -webkit-text-fill-color:#9c8a66; }
   .hero .big { font-size:34px; font-weight:800; letter-spacing:-.03em; line-height:1.1; margin-top:2px; font-variant-numeric:tabular-nums; }
   .hero .big small { font-size:.55em; color:var(--mute); font-weight:600; margin-left:2px; }
   .hero .side { margin-left:auto; text-align:right; color:var(--mute); font-size:12.5px; }
@@ -69,9 +71,9 @@
   /* Nút ghi âm */
   .micbox { display:flex; flex-direction:column; align-items:center; padding:26px 0 14px; }
   .mic { position:relative; width:132px; height:132px; border-radius:50%; background:var(--grad); display:grid; place-items:center;
-         box-shadow:0 18px 50px -12px rgba(34,211,238,.65), inset 0 2px 0 rgba(255,255,255,.35); transition:transform .2s cubic-bezier(.2,.8,.2,1); touch-action:manipulation; }
+         box-shadow:0 18px 50px -12px rgba(246,196,83,.65), inset 0 2px 0 rgba(255,255,255,.35); transition:transform .2s cubic-bezier(.2,.8,.2,1); touch-action:manipulation; }
   .mic:active { transform:scale(.94); }
-  .mic svg { width:46px; height:46px; color:#06221a; position:relative; z-index:1; }
+  .mic svg { width:46px; height:46px; color:#2b1a02; position:relative; z-index:1; }
   .mic::before, .mic::after { content:''; position:absolute; inset:0; border-radius:50%; border:2px solid var(--a2); opacity:0; }
   .mic.on { background:linear-gradient(120deg, #ff5f7e, #ff8a5b); box-shadow:0 18px 50px -10px rgba(255,95,126,.7); }
   .mic.on svg { color:#2a0710; }
@@ -86,14 +88,14 @@
 
   .bar { display:flex; align-items:center; gap:6px; padding:6px; border-radius:18px; background:var(--glass); border:1px solid var(--line);
          transition:border-color .25s, box-shadow .25s; }
-  .bar:focus-within { border-color:rgba(34,211,238,.55); box-shadow:0 0 0 4px rgba(34,211,238,.13); }
+  .bar:focus-within { border-color:rgba(246,196,83,.55); box-shadow:0 0 0 4px rgba(246,196,83,.13); }
   .bar svg { width:18px; margin-left:10px; color:var(--dim); flex:none; }
   input, select { font:inherit; color:var(--text); font-size:16px; }
   .bar input { flex:1; min-width:0; background:none; border:0; outline:0; padding:10px 4px; }
   input::placeholder { color:var(--dim); }
   .btn { height:42px; padding:0 16px; border-radius:13px; font-weight:700; white-space:nowrap; transition:transform .15s, background .2s; }
   .btn:active { transform:scale(.95); }
-  .btn.main { background:var(--grad); color:#05201a; }
+  .btn.main { background:var(--grad); color:#2b1a02; }
   .btn.ghost { background:var(--glass2); }
   .btn.danger { background:rgba(255,95,126,.14); color:#ff8fa3; }
   .chips { display:flex; gap:8px; overflow-x:auto; padding:12px 2px 2px; scrollbar-width:none; }
@@ -102,7 +104,7 @@
 
   /* Vừa ghi */
   #added { display:grid; grid-template-columns:minmax(0,1fr); gap:10px; margin-top:14px; }
-  .addcard { padding:12px 14px; display:flex; align-items:center; gap:12px; animation:rise .45s cubic-bezier(.2,.8,.2,1); border-color:rgba(52,211,153,.35); }
+  .addcard { padding:12px 14px; display:flex; align-items:center; gap:12px; animation:rise .45s cubic-bezier(.2,.8,.2,1); border-color:rgba(246,196,83,.35); }
   .addcard .meta { flex:1; min-width:0; }
   .addcard .amt { font-size:20px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
   .addcard .nt { font-size:13.5px; color:var(--mute); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -127,7 +129,7 @@
   .tot .v small { font-size:.55em; color:var(--mute); }
   .tot .cmp { font-size:13px; color:var(--mute); text-align:right; }
   @media (max-width:520px) { .tot .cmp { text-align:left; } }
-  .up { color:#ff8fa3; font-weight:700; } .down { color:var(--a1); font-weight:700; }
+  .up { color:#ff8fa3; font-weight:700; } .down { color:#34d399; font-weight:700; }
   .h3 { font-size:13px; color:var(--mute); font-weight:600; text-transform:uppercase; letter-spacing:.06em; margin:0 0 12px; }
   .bars svg { width:100%; height:170px; display:block; overflow:visible; }
   .bars text { fill:var(--dim); font-size:10px; font-family:inherit; }
@@ -170,7 +172,7 @@
   .fld { margin-bottom:12px; }
   .fld label { display:block; color:var(--mute); font-size:12.5px; font-weight:600; margin:0 0 6px 4px; }
   .fld input { width:100%; background:var(--glass); border:1px solid var(--line); border-radius:14px; padding:12px 14px; outline:0; }
-  .fld input:focus { border-color:rgba(34,211,238,.55); }
+  .fld input:focus { border-color:rgba(246,196,83,.55); }
   .fld .hint { font-size:12.5px; color:var(--a1); margin:5px 0 0 4px; min-height:18px; font-weight:600; }
   .catgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(96px,1fr)); gap:8px; }
   .catgrid button { padding:9px 6px; border-radius:14px; background:var(--glass); border:1px solid var(--line); font-size:12.5px; display:flex; flex-direction:column; align-items:center; gap:3px; }
@@ -194,7 +196,7 @@
   .hero2 > div { padding:14px 16px; }
   .hero2 .lbl { color:var(--mute); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
   .hero2 .v { font-size:22px; font-weight:800; letter-spacing:-.02em; margin-top:2px; font-variant-numeric:tabular-nums; }
-  .owe { color:#ff8fa3; } .owed { color:var(--a1); }
+  .owe { color:#ff8fa3; } .owed { color:#34d399; }
   .pcard { display:flex; align-items:center; gap:12px; padding:12px 14px; width:100%; text-align:left; margin-bottom:10px; }
   .avatar { width:42px; height:42px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:16px; flex:none; color:#07080c; }
   .pcard .meta { flex:1; min-width:0; }
@@ -210,6 +212,15 @@
   .hrow .a { font-weight:700; font-variant-numeric:tabular-nums; }
   .hrow .x { width:30px; height:30px; border-radius:9px; color:var(--dim); font-size:15px; }
   .pbal { font-size:26px; font-weight:800; letter-spacing:-.02em; margin:0 0 4px; }
+  .gsbtn { position:relative; }
+  .gsbtn i { position:absolute; right:7px; top:7px; width:8px; height:8px; border-radius:50%; background:#5b6070; box-shadow:0 0 0 2px #15161c; }
+  .gsbtn.ok i { background:#34d399; } .gsbtn.wait i { background:var(--a1); } .gsbtn.err i { background:#ff5f7e; }
+  .gsbtn.busy svg { animation:spin 1s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .gsbox { padding:14px 4px 6px; border-bottom:1px solid var(--line); }
+  .gsbox .st { font-size:13.5px; color:var(--mute); margin:4px 0 10px; }
+  .gsbox .row2 { display:flex; gap:8px; flex-wrap:wrap; }
+  .gsbox .row2 .btn { flex:1; }
   .toast { position:fixed; left:50%; bottom:max(24px, env(safe-area-inset-bottom)); transform:translate(-50%, 140%); background:#1b1e27; border:1px solid var(--line);
            padding:11px 16px; border-radius:14px; font-size:14px; z-index:30; transition:transform .3s cubic-bezier(.2,.8,.2,1); white-space:nowrap; box-shadow:0 10px 30px rgba(0,0,0,.5); visibility:hidden; }
   .toast.on { transform:translate(-50%, 0); visibility:visible; }
@@ -220,9 +231,10 @@
 <div class="aura"><i></i><i></i><i></i></div><div class="grain"></div>
 <div class="wrap">
   <header>
-    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#05201a" stroke-width="2.4" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#2b1a02" stroke-width="2.4" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
     <div><h1>Chi Tiêu <b>Giọng Nói</b></h1><p>Nói một câu là ghi xong</p></div>
     <div class="sp"></div>
+    <button class="icbtn gsbtn" id="gsBtn" aria-label="Google Sheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M4 9h16M4 15h16M10 9v12"/></svg><i></i></button>
     <button class="icbtn" id="menuBtn" aria-label="Tuỳ chọn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
   </header>
 
@@ -286,6 +298,7 @@
 <div class="sheet menu" id="menu">
   <div class="grab"></div>
   <h2>Tuỳ chọn</h2>
+  <div class="gsbox"><b>📗 Google Sheet</b><div class="st" id="gsSt"></div><div class="row2" id="gsActs"></div></div>
   <button class="item" id="mCsv"><span class="ico">⬇️</span><span>Xuất CSV<small>Mở được bằng Excel / Google Sheets</small></span></button>
   <button class="item" id="mImp"><span class="ico">⬆️</span><span>Nhập lại từ CSV<small>Dùng file đã xuất từ app này (chuyển máy)</small></span></button>
   <button class="item" id="mNew"><span class="ico">✍️</span><span>Thêm tay<small>Tự điền số tiền, nhóm, ngày</small></span></button>
@@ -321,6 +334,8 @@ const VN = (() => {
   const KEND = new Set(['k', 'ca', 'ka', 'cành']);
   const TENS = new Set(['mươi', 'muoi']), CHUC = new Set(['chục', 'chuc']), HALF = new Set(['rưỡi', 'rưởi', 'ruoi']);
   const LINH = new Set(['linh', 'lẻ', 'le']), CUR = new Set(['đồng', 'dong', 'đ', 'd', 'vnd', 'vnđ']);
+  const USD = new Set(['đô', 'usd', 'dollar', 'dollars', 'đôla', 'do']);
+  let RATE = 26300; // tỷ giá USD→VND, app cập nhật mỗi ngày
   // Số lượng: "2 ly", "một tô" → không phải tiền
   const QTY = new Set(('ly cốc tách cái chiếc bát tô đĩa dĩa suất phần gói hộp chai lon kg ký cân lạng lít người vé lần cây quả trái đôi bộ con km '
     + 'giờ tiếng phút ngày đêm tháng tuần bao thùng két que miếng cuốn quyển bình hũ lọ củ bó chén xiên cặp tấm tờ bản đứa tầng phòng mét m2 năm').split(' '));
@@ -344,6 +359,7 @@ const VN = (() => {
     if (HALF.has(w)) return { t: 'R' };
     if (LINH.has(w)) return { t: 'L' };
     if (CUR.has(w)) return { t: 'cur' };
+    if (USD.has(w)) return { t: 'cur', usd: true };
     return null;
   }
 
@@ -396,6 +412,7 @@ const VN = (() => {
     const tk = run.toks.filter(x => x.t !== 'cur');
     let v = big(tk);
     const hasBig = tk.some(x => x.t === 's' && x.v >= 1e3);
+    if (run.usd) return Math.round(v * 100) / 100;   // số đô, đổi sang tiền Việt sau
     if (!hasBig && v < 1000) v *= 1000;   // "phở 50", "2 trăm rưỡi" → nghìn
     return Math.round(v);
   }
@@ -415,7 +432,7 @@ const VN = (() => {
       if (tk.t === 's' && tk.need && !(cur && cur.toks[cur.toks.length - 1].t === 'n')) { end(); continue; }
       if (tk.t === 'cur') {
         const l = cur && cur.toks[cur.toks.length - 1];
-        if (l && /^(n|s|R)$/.test(l.t)) { cur.toks.push(tk); cur.end = i; cur.cur = true; }
+        if (l && /^(n|s|R|M|C)$/.test(l.t) && !(tk.usd && lw[i] === 'do' && !/^\d/.test(lw[i - 1]))) { cur.toks.push(tk); cur.end = i; cur.cur = true; if (tk.usd) cur.usd = true; }
         end(); continue;
       }
       if (tk.t === 'L' && !(cur && cur.toks[cur.toks.length - 1].t === 's')) { end(); continue; }
@@ -432,7 +449,8 @@ const VN = (() => {
       const strong = r.cur || r.toks.some(x => x.t === 's' || x.t === 'M' || x.t === 'C' || x.t === 'R') ||
         r.toks.some(x => x.digit && x.v >= 1000) || r.toks.filter(x => x.t === 'n' && !x.digit).length >= 2;
       const digit = r.toks.every(x => x.digit);
-      return { ...r, strong, digit, value: evalRun(r) };
+      const value = evalRun(r);
+      return { ...r, strong, digit, value: r.usd ? Math.round(value * RATE) : value, usd: r.usd ? value : 0 };
     });
   }
 
@@ -507,7 +525,7 @@ const VN = (() => {
   // ---- Tách cả câu ----
   function parse(text, opt = {}) {
     const now = opt.now || new Date();
-    let s = nfc(text).replace(/₫/g, ' đồng ').replace(/\s+/g, ' ').trim();
+    let s = nfc(text).replace(/₫/g, ' đồng ').replace(/\$\s*(\d[\d.,]*)/g, '$1 đô ').replace(/(\d)\s*\$/g, '$1 đô ').replace(/đô\s*-?\s*la\b/giu, 'đô').replace(/\s+/g, ' ').trim();
     const heard = s;
     let date = now;
     for (const [re, fn] of DATES) {
@@ -546,7 +564,7 @@ const VN = (() => {
       else if (after) idx = range(r.end + 1, (chosen[k + 1] ? chosen[k + 1].start : lw.length) - 1);
       else idx = range(k ? chosen[k - 1].end + 1 : 0, r.start - 1).concat(k === chosen.length - 1 ? range(r.end + 1, lw.length - 1) : []);
       const note = clean(idx);
-      return { amount: r.value, note, cat: guessCat(note || heard, opt.learned) };
+      return { amount: r.value, usd: r.usd, note: r.usd ? (note ? note + ' ' : '') + `(${r.usd.toLocaleString('vi-VN')} USD)` : note, cat: guessCat(note || heard, opt.learned) };
     });
     // Món sau không rõ nhóm thì theo món trước ("ăn sáng 30k, trưa 50k")
     for (let k = 1; k < items.length; k++) if (items[k].cat === 'khac') items[k].cat = items[k - 1].cat;
@@ -587,7 +605,7 @@ const VN = (() => {
     const debtWord = /\s(nợ|vay|mượn|thiếu)\s/u.test(lo);
     const known = (opt.people || []).some(k => k && lo.includes(' ' + k.toLowerCase() + ' '));
     if (!debtWord && !(/\strả\s/u.test(lo) && (/\slại\s/u.test(lo) || known))) return null;
-    const base = { amount: p.items[0].amount, date: p.date, heard: p.heard };
+    const base = { amount: p.items[0].amount, usd: p.items[0].usd, date: p.date, heard: p.heard };
     for (const [re, kind] of DEBT_RULES) {
       const m = R.match(re);
       if (!m) continue;
@@ -598,7 +616,8 @@ const VN = (() => {
     return { ...base, kind: 'vay', person: 'Không rõ' };
   }
 
-  return { parse, parseDebt, amountOnly, guessCat, learnKey, CATS, ymd, strip };
+  const setRate = r => { if (r > 1000) RATE = r; }, getRate = () => RATE;
+  return { parse, parseDebt, setRate, getRate, amountOnly, guessCat, learnKey, CATS, ymd, strip };
 })();
 // ===== (PARSER-END) =====
 
@@ -607,7 +626,7 @@ const KEY = 'chitieu.v1', LKEY = 'chitieu.learn';
 const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch { return d; } };
 let db = load(KEY, []);
 let learned = load(LKEY, {});
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch {} };
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch {} markDirty(); };
 const saveLearn = () => { try { localStorage.setItem(LKEY, JSON.stringify(learned)); } catch {} };
 const CAT = Object.fromEntries(VN.CATS.map(c => [c.id, c]));
 const $ = s => document.querySelector(s);
@@ -625,6 +644,15 @@ function addEntries(res) {
   db.push(...out); save();
   return out;
 }
+
+// ===== TỶ GIÁ ĐÔ =====
+// Chỉ hỏi tỷ giá chung (không gửi dữ liệu gì), mỗi 12 tiếng; mất mạng thì dùng số cũ
+let usdRate = load('chitieu.usd', { r: 26300, at: 0 });
+VN.setRate(usdRate.r);
+if (Date.now() - usdRate.at > 432e5) fetch('https://open.er-api.com/v6/latest/USD').then(r => r.json()).then(j => {
+  const v = j && j.rates && j.rates.VND;
+  if (v > 1000) { usdRate = { r: Math.round(v), at: Date.now() }; VN.setRate(usdRate.r); try { localStorage.setItem('chitieu.usd', JSON.stringify(usdRate)); } catch {} }
+}).catch(() => {});
 
 // ===== GHI ÂM =====
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -645,17 +673,23 @@ function finish() {
   else if (!live.classList.contains('err')) setLive('Chưa nghe rõ, bấm nói lại nhé.', true);
 }
 
+// Mở từ màn hình chính iPhone, nhận giọng của trình duyệt hay bị chặn → dùng 🎤 bàn phím (đọc chính tả), cũng miễn phí
+const STANDALONE = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+const NOSR = 'chitieu.nosr' + (STANDALONE ? '.app' : '');
+function keyboardMode(msg) {
+  setLive(msg || 'Chạm <b>🎤 trên bàn phím</b> rồi nói, ví dụ “phở 50 nghìn”, xong bấm <b>Ghi</b>.');
+  $('#typed').focus();
+}
+function srBroken() { try { localStorage.setItem(NOSR, '1'); } catch {} }
 function startMic() {
-  if (!SR) {
-    setLive('Máy này chưa hỗ trợ nghe trực tiếp — bấm vào ô bên dưới rồi chạm <b>🎤 trên bàn phím</b> để nói.', true);
-    $('#typed').focus();
-    return;
-  }
+  let broken = false; try { broken = localStorage.getItem(NOSR) === '1'; } catch {}
+  if (!SR || broken) { keyboardMode(); return; }
+  let started = false;
   rec = new SR();
   rec.lang = 'vi-VN'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 4;
   done = false; heardTxt = ''; heardAlts = [];
   rec.onstart = () => {
-    listening = true; mic.classList.add('on'); setLive('Đang nghe…'); startMeter(); if (navigator.vibrate) navigator.vibrate(15);
+    started = true; listening = true; mic.classList.add('on'); setLive('Đang nghe…'); startMeter(); if (navigator.vibrate) navigator.vibrate(15);
     maxT = setTimeout(finish, 15000);
   };
   rec.onresult = e => {
@@ -675,11 +709,14 @@ function startMic() {
     const m = { 'not-allowed': 'Chưa cho phép micro — vào Cài đặt trình duyệt cho phép rồi thử lại.', 'service-not-allowed': 'Máy chưa bật nhận giọng (iPhone: Cài đặt → Siri / Đọc chính tả). Có thể gõ bằng 🎤 trên bàn phím.',
       'no-speech': 'Chưa nghe thấy gì, bấm nói lại nhé.', 'network': 'Cần mạng để nhận giọng nói.', 'audio-capture': 'Không mở được micro.' }[e.error];
     if (heardTxt.trim()) { finish(); return; }
-    if (e.error !== 'aborted') setLive(m || 'Lỗi nhận giọng: ' + esc(e.error), true);
     done = true; rec = null; micOff();
+    if (/service-not-allowed|not-allowed|audio-capture/.test(e.error) && STANDALONE) { srBroken(); keyboardMode('App ở màn hình chính không dùng được nghe trực tiếp — chạm <b>🎤 trên bàn phím</b> để nói nhé (lần sau tự vào chế độ này).'); return; }
+    if (e.error !== 'aborted') setLive(m || 'Lỗi nhận giọng: ' + esc(e.error), true);
   };
   rec.onend = () => finish();
-  try { rec.start(); } catch (e) { done = true; rec = null; micOff(); setLive('Không bật được micro: ' + esc(e.message), true); }
+  try { rec.start(); } catch (e) { done = true; rec = null; micOff(); setLive('Không bật được micro: ' + esc(e.message), true); return; }
+  // Không phản hồi gì sau 4 giây → coi như máy không nghe được
+  setTimeout(() => { if (!started && !done) { done = true; try { rec && rec.abort(); } catch {} rec = null; micOff(); if (STANDALONE) srBroken(); keyboardMode('Micro không phản hồi — chạm <b>🎤 trên bàn phím</b> để nói nhé.'); } }, 4000);
 }
 // Bấm lần nữa khi đang nghe = chốt ngay
 mic.onclick = () => { if (listening || (rec && !done)) finish(); else startMic(); };
@@ -705,7 +742,7 @@ function handleText(alts, typed) {
   for (const a of alts) {
     const d = VN.parseDebt(a, { people: people() });
     if (!d) continue;
-    const x = { id: uid(), kind: d.kind, person: d.person, amt: d.amount, date: d.date, ts: Date.now(), heard: d.heard };
+    const x = { id: uid(), kind: d.kind, person: d.person, amt: d.amount, date: d.date, ts: Date.now(), heard: d.heard + (d.usd ? ` (${d.usd} USD × ${VN.getRate().toLocaleString('vi-VN')})` : '') };
     debts.push(x); saveDebts();
     setTab('no');
     setLive((typed ? 'Đã ghi vào sổ nợ: ' : 'Nghe được: ') + '<b>“' + esc(d.heard) + '”</b>');
@@ -732,7 +769,7 @@ $('#typeForm').onsubmit = e => {
   $('#typed').value = '';
   $('#typed').blur();
 };
-const TRY = { chi: ['vừa ăn phở 50 nghìn', 'đổ xăng 80k', 'mua đồ Shopee 2 trăm rưỡi', 'cà phê năm chục', 'tiền nhà 1 triệu 2', 'hôm qua đi grab 45 nghìn'],
+const TRY = { chi: ['vừa ăn phở 50 nghìn', 'đổ xăng 80k', 'mua sách Amazon 20 đô', 'mua đồ Shopee 2 trăm rưỡi', 'cà phê năm chục', 'tiền nhà 1 triệu 2', 'hôm qua đi grab 45 nghìn'],
   no: ['nợ anh Hùng 500k', 'cho chị Lan vay 2 triệu', 'trả nợ anh Hùng 200k', 'chị Lan trả 1 triệu', 'Tuấn nợ mình 300k'] };
 const paintTry = () => { $('#tryChips').innerHTML = TRY[tab].map(t => `<button class="chip">${esc(t)}</button>`).join(''); $('#typed').placeholder = tab === 'no' ? 'Hoặc gõ: nợ anh Hùng 500k' : 'Hoặc gõ: đổ xăng 80k'; };
 $('#tryChips').onclick = e => { const b = e.target.closest('.chip'); if (b) { $('#typed').value = b.textContent; $('#typed').focus(); } };
@@ -849,7 +886,7 @@ function renderBars([s, e], items) {
   const W = 600, H = 170, top = 18, bot = 22, n = buckets.length, gap = n > 20 ? 3 : 10;
   const bw = (W - gap * (n - 1)) / n, max = Math.max(...buckets.map(b => b.v), 1);
   const peak = buckets.reduce((a, b) => b.v > a.v ? b : a, buckets[0]);
-  let h = `<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#34d399" stop-opacity=".55"/></linearGradient></defs>`;
+  let h = `<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe29a"/><stop offset="1" stop-color="#d4912a" stop-opacity=".6"/></linearGradient></defs>`;
   buckets.forEach((b, i) => {
     const x = i * (bw + gap), bh = b.v ? Math.max(3, (H - top - bot) * b.v / max) : 2, y = H - bot - bh;
     h += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${Math.min(6, bw / 2)}" fill="${b.v ? 'url(#bg)' : 'rgba(255,255,255,.08)'}" opacity="${b.today ? 1 : b.v ? .85 : 1}"/>`;
@@ -962,41 +999,50 @@ $('#menuBtn').onclick = () => openSheet($('#menu'));
 $('#mClose').onclick = closeSheets;
 $('#mNew').onclick = () => { closeSheets(); setTimeout(() => openEdit(null), 200); };
 const csvCell = v => /[",\n]/.test(v) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
-$('#mCsv').onclick = () => {
-  const head = ['Ngày', 'Giờ', 'Khoản chi', 'Nhóm', 'Số tiền', 'Câu nói'];
-  const rows = db.slice().sort((a, b) => a.date.localeCompare(b.date) || a.ts - b.ts).map(x => [x.date, new Date(x.ts).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }), x.note, (CAT[x.cat] || CAT.khac).name, x.amt, x.heard || '']);
-  const csv = '﻿' + [head, ...rows].map(r => r.map(csvCell).join(',')).join('\n');
+const csvChi = () => [['Ngày', 'Giờ', 'Khoản chi', 'Nhóm', 'Số tiền', 'Câu nói'], ...db.slice().sort((a, b) => a.date.localeCompare(b.date) || a.ts - b.ts)
+  .map(x => [x.date, new Date(x.ts).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }), x.note, (CAT[x.cat] || CAT.khac).name, x.amt, x.heard || ''])].map(r => r.map(csvCell).join(',')).join('\n');
+function download(name, csv) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-  a.download = `chi-tieu-${today()}.csv`;
-  document.body.appendChild(a); a.click(); a.remove();
-  closeSheets(); toast('Đã xuất ' + db.length + ' khoản');
-};
-$('#mImp').onclick = () => $('#impFile').click();
-$('#impFile').onchange = async e => {
-  const f = e.target.files[0]; if (!f) return;
-  const txt = (await f.text()).replace(/^﻿/, '');
+  a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+$('#mCsv').onclick = () => { download(`chi-tieu-${today()}.csv`, csvChi()); closeSheets(); toast('Đã xuất ' + db.length + ' khoản'); };
+function parseCSV(txt) {
+  txt = txt.replace(/^﻿/, '').replace(/\r\n/g, '\n');
   const rows = [], re = /("([^"]|"")*"|[^,\n]*)(,|\n|$)/g;
   let row = [], m;
-  while ((m = re.exec(txt)) && m[0] !== '') { let c = m[1]; if (c[0] === '"') c = c.slice(1, -1).replace(/""/g, '"'); row.push(c.replace(/\r$/, '')); if (m[3] !== ',') { rows.push(row); row = []; } }
+  while ((m = re.exec(txt)) && m[0] !== '') { let c = m[1]; if (c[0] === '"') c = c.slice(1, -1).replace(/""/g, '"'); row.push(c); if (m[3] !== ',') { rows.push(row); row = []; } }
+  return rows;
+}
+// Google Sheet có thể trả ngày dạng 2026-10-01 hoặc 1/10/2026, số tiền dạng 50000 hoặc 50.000
+const normDate = v => { v = String(v).trim(); if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v; const m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` : ''; };
+const normNum = v => +String(v).replace(/[^\d-]/g, '') || 0;
+function importChi(rows) {
   const byName = Object.fromEntries(VN.CATS.map(c => [c.name, c.id]));
   const seen = new Set(db.map(x => x.date + '|' + x.note + '|' + x.amt));
   let n = 0;
   rows.slice(1).forEach(r => {
-    if (r.length < 5 || !/^\d{4}-\d{2}-\d{2}$/.test(r[0])) return;
-    const amt = +r[4], k = r[0] + '|' + r[2] + '|' + amt;
-    if (!amt || seen.has(k)) return;
+    const date = normDate(r[0] || ''), amt = normNum(r[4]);
+    if (r.length < 5 || !date || !amt) return;
+    const k = date + '|' + r[2] + '|' + amt;
+    if (seen.has(k)) return;
     seen.add(k);
-    const [hh, mm] = (r[1] || '12:00').split(':').map(Number), d = pd(r[0]); d.setHours(hh || 12, mm || 0);
-    db.push({ id: uid(), amt, note: r[2], cat: byName[r[3]] || 'khac', date: r[0], ts: +d, heard: r[5] || '' }); n++;
+    const [hh, mm] = (r[1] || '12:00').split(':').map(Number), d = pd(date); d.setHours(hh || 12, mm || 0);
+    db.push({ id: uid(), amt, note: r[2], cat: byName[r[3]] || 'khac', date, ts: +d, heard: r[5] || '' }); n++;
   });
+  return n;
+}
+$('#mImp').onclick = () => $('#impFile').click();
+$('#impFile').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const n = importChi(parseCSV(await f.text()));
   save(); render(); closeSheets(); e.target.value = '';
   toast(n ? `Đã nhập ${n} khoản` : 'Không có khoản mới');
 };
 
 // ===== SỔ NỢ =====
 let debts = load('chitieu.no', []);
-const saveDebts = () => { try { localStorage.setItem('chitieu.no', JSON.stringify(debts)); } catch {} renderDebts(); };
+const saveDebts = () => { try { localStorage.setItem('chitieu.no', JSON.stringify(debts)); } catch {} renderDebts(); markDirty(); };
 // sign: + là người ta nợ mình, − là mình nợ người ta
 const DK = {
   vay:    { ic: '🫴', c: '#ff8fa3', cls: 'owe',  sign: -1, lb: 'Mình vay',          say: p => 'Mình nợ ' + p },
@@ -1062,14 +1108,147 @@ $('#pHist').onclick = e => {
   toast('Đã xoá', 'Hoàn tác', () => { debts.push(x); saveDebts(); });
 };
 $('#pClose').onclick = closeSheets;
-$('#mCsvNo').onclick = () => {
-  const head = ['Ngày', 'Người', 'Loại', 'Số tiền', 'Câu nói'];
-  const rows = debts.slice().sort((a, b) => a.date.localeCompare(b.date) || a.ts - b.ts).map(x => [x.date, x.person, DK[x.kind].lb, DK[x.kind].sign * x.amt, x.heard || '']);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['﻿' + [head, ...rows].map(r => r.map(csvCell).join(',')).join('\n')], { type: 'text/csv;charset=utf-8' }));
-  a.download = `so-no-${today()}.csv`; document.body.appendChild(a); a.click(); a.remove();
-  closeSheets(); toast('Đã xuất ' + debts.length + ' dòng sổ nợ');
+const csvNo = () => [['Ngày', 'Người', 'Loại', 'Số tiền', 'Câu nói'], ...debts.slice().sort((a, b) => a.date.localeCompare(b.date) || a.ts - b.ts)
+  .map(x => [x.date, x.person, DK[x.kind].lb, DK[x.kind].sign * x.amt, x.heard || ''])].map(r => r.map(csvCell).join(',')).join('\n');
+$('#mCsvNo').onclick = () => { download(`so-no-${today()}.csv`, csvNo()); closeSheets(); toast('Đã xuất ' + debts.length + ' dòng sổ nợ'); };
+function importNo(rows) {
+  const byLb = Object.fromEntries(Object.entries(DK).map(([k, v]) => [v.lb, k]));
+  const seen = new Set(debts.map(x => x.date + '|' + pkey(x.person) + '|' + x.kind + '|' + x.amt));
+  let n = 0;
+  rows.slice(1).forEach(r => {
+    const date = normDate(r[0] || ''), kind = byLb[r[2]], amt = Math.abs(normNum(r[3]));
+    if (!date || !kind || !amt || !r[1]) return;
+    const k = date + '|' + pkey(r[1]) + '|' + kind + '|' + amt;
+    if (seen.has(k)) return;
+    seen.add(k);
+    debts.push({ id: uid(), kind, person: r[1], amt, date, ts: +pd(date) + 432e5, heard: r[4] || '' }); n++;
+  });
+  return n;
+}
+
+// ===== GOOGLE SHEET =====
+// Đăng nhập Google → tự chép khoản chi + sổ nợ vào 2 bảng tính trong Drive của chính anh.
+// Quyền drive.file: app chỉ thấy file do nó tạo, không đọc được gì khác trong Drive.
+const GCID = '38686176630-18uu44nhed8kgus2mgmg10n7hf5gjoal.apps.googleusercontent.com';
+const GSCOPE = 'https://www.googleapis.com/auth/drive.file';
+const GNAME = { chi: 'Chi Tiêu – Khoản chi', no: 'Chi Tiêu – Sổ nợ' };
+let gs = load('chitieu.gs', {}), gTok = load('chitieu.gtok', {}), gBusy = false, gT = 0;
+const saveGs = () => { try { localStorage.setItem('chitieu.gs', JSON.stringify(gs)); } catch {} };
+const tokOk = () => gTok.t && Date.now() < gTok.e - 60e3;
+function markDirty() { if (!gs || !gs.on) return; gs.dirty = true; saveGs(); clearTimeout(gT); gT = setTimeout(gSync, 2000); paintGs(); }
+// Cách 1: cửa sổ Google bật lên (chạy cả Safari lẫn app màn hình chính, không cần khai báo thêm)
+let gsiP = null;
+const loadGsi = () => gsiP ||= new Promise((res, rej) => { if (window.google?.accounts?.oauth2) return res(); const sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; sc.onload = res; sc.onerror = () => { gsiP = null; rej(); }; document.head.appendChild(sc); });
+let tokClient = null;
+function gAuth() {
+  if (!window.google?.accounts?.oauth2) { loadGsi().then(() => toast('Chạm lại để đăng nhập Google')).catch(() => toast('Không tải được Google — kiểm tra mạng')); return; }
+  tokClient ||= google.accounts.oauth2.initTokenClient({
+    client_id: GCID, scope: GSCOPE,
+    callback: r => {
+      if (r.error) { gs.err = 'Google từ chối: ' + r.error; saveGs(); paintGs(); return; }
+      gTok = { t: r.access_token, e: Date.now() + (+r.expires_in || 3600) * 1000 };
+      try { localStorage.setItem('chitieu.gtok', JSON.stringify(gTok)); } catch {}
+      gSync(!gs.pulled);
+    },
+    error_callback: e => { if (STANDALONE && /popup_failed/.test(e.type)) gLogin(); else { gs.err = e.type === 'popup_closed' ? '' : 'Chưa mở được cửa sổ Google (' + e.type + ')'; saveGs(); paintGs(); } },
+  });
+  tokClient.requestAccessToken({ prompt: gs.pulled ? '' : 'select_account' });
+}
+// Cách 2 (dự phòng): chuyển hẳn sang trang Google rồi quay về
+function gLogin() {
+  const st = Math.random().toString(36).slice(2);
+  try { sessionStorage.setItem('chitieu.gst', st); localStorage.setItem('chitieu.gst', st); } catch {}
+  const q = new URLSearchParams({ client_id: GCID, redirect_uri: location.origin + location.pathname.replace(/index\.html$/, ''), response_type: 'token', scope: GSCOPE, include_granted_scopes: 'true', state: st });
+  if (gs.email) q.set('login_hint', gs.email);
+  location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + q;
+}
+function gReadRedirect() {
+  if (!/[#&](access_token|error)=/.test(location.hash)) return false;
+  const q = new URLSearchParams(location.hash.slice(1));
+  let want = null; try { want = sessionStorage.getItem('chitieu.gst') || localStorage.getItem('chitieu.gst'); } catch {}
+  history.replaceState(null, '', location.pathname);
+  if (q.get('access_token') && (!want || q.get('state') === want)) {
+    gTok = { t: q.get('access_token'), e: Date.now() + (+q.get('expires_in') || 3600) * 1000 };
+    try { localStorage.setItem('chitieu.gtok', JSON.stringify(gTok)); } catch {}
+    return true;
+  }
+  if (q.get('error')) setTimeout(() => toast('Chưa đăng nhập được Google: ' + q.get('error')), 300);
+  return false;
+}
+async function gApi(url, opt = {}) {
+  const r = await fetch(url, { ...opt, headers: { Authorization: 'Bearer ' + gTok.t, ...(opt.headers || {}) } });
+  if (r.status === 401) { gTok = {}; const e = new Error('Cần đăng nhập lại Google'); e.login = true; throw e; }
+  if (!r.ok) { const e = new Error('Google báo lỗi ' + r.status); e.status = r.status; e.body = (await r.text()).slice(0, 300); throw e; }
+  return r;
+}
+async function gFind(name) {
+  const q = encodeURIComponent(`name='${name}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`);
+  const r = await (await gApi(`https://www.googleapis.com/drive/v3/files?q=${q}&orderBy=modifiedTime desc&fields=files(id)`)).json();
+  return r.files && r.files[0] ? r.files[0].id : null;
+}
+async function gPut(name, id, csv) {
+  if (id) {
+    try { await gApi(`https://www.googleapis.com/upload/drive/v3/files/${id}?uploadType=media`, { method: 'PATCH', headers: { 'Content-Type': 'text/csv; charset=UTF-8' }, body: csv }); return id; }
+    catch (e) { if (e.login || e.status !== 404) throw e; }  // file bị xoá → tạo lại
+  }
+  const b = 'ctgn' + Math.random().toString(36).slice(2);
+  const body = `--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name, mimeType: 'application/vnd.google-apps.spreadsheet' })}\r\n--${b}\r\nContent-Type: text/csv; charset=UTF-8\r\n\r\n${csv}\r\n--${b}--`;
+  const r = await (await gApi('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', { method: 'POST', headers: { 'Content-Type': 'multipart/related; boundary=' + b }, body })).json();
+  return r.id;
+}
+const gGet = async id => (await gApi(`https://www.googleapis.com/drive/v3/files/${id}/export?mimeType=text/csv`)).text();
+// Lần đầu kết nối (hoặc máy mới): đã có bảng tính cũ thì lấy về gộp trước rồi mới ghi đè
+async function gPull() {
+  let n = 0;
+  if (!gs.chi) gs.chi = await gFind(GNAME.chi);
+  if (!gs.no) gs.no = await gFind(GNAME.no);
+  if (gs.chi) n += importChi(parseCSV(await gGet(gs.chi)));
+  if (gs.no) n += importNo(parseCSV(await gGet(gs.no)));
+  if (n) { try { localStorage.setItem(KEY, JSON.stringify(db)); localStorage.setItem('chitieu.no', JSON.stringify(debts)); } catch {} render(); renderDebts(); }
+  return n;
+}
+async function gSync(first) {
+  if (!gs.on || gBusy) return;
+  if (!tokOk()) { paintGs(); return; }
+  gBusy = true; gs.err = ''; paintGs();
+  try {
+    if (first || !gs.pulled) { const n = await gPull(); gs.pulled = true; if (n) toast(`Đã lấy về ${n} dòng từ Google Sheet`); }
+    gs.chi = await gPut(GNAME.chi, gs.chi, csvChi());
+    gs.no = await gPut(GNAME.no, gs.no, csvNo());
+    gs.at = Date.now(); gs.dirty = false;
+  } catch (e) { gs.err = e.login ? '' : e.message + (e.body ? ' — ' + e.body.replace(/\s+/g, ' ').slice(0, 140) : ''); }
+  gBusy = false; saveGs(); paintGs();
+}
+function paintGs() {
+  const b = $('#gsBtn');
+  b.classList.remove('ok', 'wait', 'err', 'busy');
+  let st, acts;
+  if (!gs.on) { st = 'Chưa kết nối. Đăng nhập Google để mỗi khoản ghi xong tự vào Google Sheet của anh (2 bảng: Khoản chi, Sổ nợ). Đổi máy chỉ cần đăng nhập lại là có đủ dữ liệu.'; acts = [['in', 'Đăng nhập Google', 'main']]; }
+  else {
+    if (gBusy) { b.classList.add('busy', 'wait'); st = 'Đang lưu lên Google Sheet…'; }
+    else if (gs.err) { b.classList.add('err'); st = 'Lỗi: ' + gs.err; }
+    else if (!tokOk() && gs.dirty) { b.classList.add('wait'); st = 'Có thay đổi chưa lưu — phiên Google đã hết (1 tiếng), chạm “Lưu ngay” để đăng nhập lại.'; }
+    else if (gs.dirty) { b.classList.add('wait'); st = 'Sắp lưu…'; }
+    else { b.classList.add('ok'); st = gs.at ? 'Đã lưu lên Google Sheet lúc ' + new Date(gs.at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + dateLabel(VN.ymd(new Date(gs.at))).toLowerCase() : 'Đã kết nối'; }
+    acts = [['sync', 'Lưu ngay', 'main']].concat(gs.chi ? [['open', 'Mở bảng tính', 'ghost']] : [], [['out', 'Ngắt', 'ghost']]);
+  }
+  $('#gsSt').textContent = st;
+  $('#gsActs').innerHTML = acts.map(([k, l, c]) => `<button class="btn ${c}" data-g="${k}">${l}</button>`).join('');
+}
+$('#gsActs').onclick = e => {
+  const k = e.target.closest('button')?.dataset.g; if (!k) return;
+  if (k === 'in') { gs.on = true; gs.pulled = false; saveGs(); gAuth(); }
+  else if (k === 'sync') { if (tokOk()) gSync(); else gAuth(); }
+  else if (k === 'open') window.open('https://docs.google.com/spreadsheets/d/' + gs.chi, '_blank');
+  else if (k === 'out') { gs = { on: false }; gTok = {}; saveGs(); try { localStorage.removeItem('chitieu.gtok'); } catch {} paintGs(); toast('Đã ngắt — dữ liệu trên máy vẫn còn'); }
 };
+$('#gsBtn').onclick = () => { loadGsi().catch(() => {}); if (gs.on && gs.dirty && !tokOk() && !gBusy && window.google?.accounts?.oauth2) gAuth(); else openSheet($('#menu')); };
+$('#menuBtn').addEventListener('click', () => loadGsi().catch(() => {}));
+if (gs.on) setTimeout(() => loadGsi().catch(() => {}), 2500);
+// Mở app lại: còn phiên thì lưu nốt phần chưa lưu
+if (gReadRedirect() && gs.on) setTimeout(() => gSync(!gs.pulled), 300);
+else if (gs.on && gs.dirty && tokOk()) setTimeout(gSync, 1500);
+paintGs();
 
 // ===== TAB =====
 let tab = load('chitieu.tab', 'chi');
@@ -1091,7 +1270,7 @@ function toast(msg, act, fn) {
 }
 
 // Điện thoại hay giữ bản cũ trong bộ nhớ đệm → hỏi máy chủ, có bản mới thì tải lại 1 lần
-const VER = '3';
+const VER = '4';
 $('#verLine').textContent = 'bản ' + VER;
 fetch('./?nocache=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
   const m = t.match(/const VER = '(\d+)'/);
@@ -1100,7 +1279,7 @@ fetch('./?nocache=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).the
     location.replace(location.pathname + '?v=' + m[1]);
   }
 }).catch(() => {});
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && isSecureContext) navigator.serviceWorker.register('sw.js').catch(() => {});
 
 setTab(tab);
 renderDebts();
