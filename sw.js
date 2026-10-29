@@ -1,5 +1,5 @@
 // Mạng trước, mất mạng thì dùng bản đã lưu — app vẫn mở được khi offline
-const C = 'chitieu-v1';
+const C = 'chitieu-v2';
 self.addEventListener('install', e => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', e => {

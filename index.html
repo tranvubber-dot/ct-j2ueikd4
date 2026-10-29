@@ -546,8 +546,21 @@ function addEntries(res) {
 // ===== GHI ÂM =====
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const mic = $('#mic'), live = $('#live');
-let rec = null, listening = false, gotFinal = false, lastAlts = [], meter = null;
+let rec = null, listening = false, done = true, heardTxt = '', heardAlts = [], silT = 0, maxT = 0, meter = null;
 const setLive = (html, err) => { live.innerHTML = html; live.classList.toggle('err', !!err); };
+const SILENCE = 1300; // im lặng chừng này là tự chốt câu (iPhone hay không tự báo câu cuối)
+
+function micOff() { listening = false; mic.classList.remove('on'); stopMeter(); clearTimeout(silT); clearTimeout(maxT); }
+// Chốt câu đã nghe: ghi luôn, không chờ trình duyệt
+function finish() {
+  if (done) return;
+  done = true;
+  const r = rec; rec = null;
+  micOff();
+  try { r && r.abort(); } catch {}
+  if (heardTxt.trim()) handleText(heardAlts.length ? heardAlts : [heardTxt]);
+  else if (!live.classList.contains('err')) setLive('Chưa nghe rõ, bấm nói lại nhé.', true);
+}
 
 function startMic() {
   if (!SR) {
@@ -557,30 +570,36 @@ function startMic() {
   }
   rec = new SR();
   rec.lang = 'vi-VN'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 4;
-  gotFinal = false; lastAlts = [];
-  rec.onstart = () => { listening = true; mic.classList.add('on'); setLive('Đang nghe…'); startMeter(); if (navigator.vibrate) navigator.vibrate(15); };
+  done = false; heardTxt = ''; heardAlts = [];
+  rec.onstart = () => {
+    listening = true; mic.classList.add('on'); setLive('Đang nghe…'); startMeter(); if (navigator.vibrate) navigator.vibrate(15);
+    maxT = setTimeout(finish, 15000);
+  };
   rec.onresult = e => {
+    if (done) return;
     let txt = '';
     for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
     const r = e.results[e.results.length - 1];
+    heardTxt = txt;
+    heardAlts = e.results.length === 1 ? Array.from(r, a => a.transcript) : [txt];
     setLive('<b>' + esc(txt) + '</b>');
-    if (r.isFinal) { gotFinal = true; lastAlts = Array.from(r, a => a.transcript); if (e.results.length > 1) lastAlts = [txt]; }
+    clearTimeout(silT);
+    // Chưa nói tới số tiền (đang ngập ngừng) thì chờ thêm rồi mới chốt
+    if (r.isFinal) finish(); else silT = setTimeout(finish, VN.parse(txt).items.length ? SILENCE : SILENCE + 2200);
   };
   rec.onerror = e => {
+    if (done) return;
     const m = { 'not-allowed': 'Chưa cho phép micro — vào Cài đặt trình duyệt cho phép rồi thử lại.', 'service-not-allowed': 'Máy chưa bật nhận giọng (iPhone: Cài đặt → Siri / Đọc chính tả). Có thể gõ bằng 🎤 trên bàn phím.',
       'no-speech': 'Chưa nghe thấy gì, bấm nói lại nhé.', 'network': 'Cần mạng để nhận giọng nói.', 'audio-capture': 'Không mở được micro.' }[e.error];
+    if (heardTxt.trim()) { finish(); return; }
     if (e.error !== 'aborted') setLive(m || 'Lỗi nhận giọng: ' + esc(e.error), true);
-    gotFinal = gotFinal && e.error === 'aborted';
+    done = true; rec = null; micOff();
   };
-  rec.onend = () => {
-    listening = false; mic.classList.remove('on'); stopMeter();
-    if (gotFinal && lastAlts.length) handleText(lastAlts);
-    else if (!live.classList.contains('err') && /Đang nghe/.test(live.textContent)) setLive('Chưa nghe rõ, bấm nói lại nhé.', true);
-    else if (!live.classList.contains('err') && live.textContent) handleText([live.textContent]);
-  };
-  try { rec.start(); } catch (e) { setLive('Không bật được micro: ' + esc(e.message), true); }
+  rec.onend = () => finish();
+  try { rec.start(); } catch (e) { done = true; rec = null; micOff(); setLive('Không bật được micro: ' + esc(e.message), true); }
 }
-mic.onclick = () => { if (listening && rec) rec.stop(); else startMic(); };
+// Bấm lần nữa khi đang nghe = chốt ngay
+mic.onclick = () => { if (listening || (rec && !done)) finish(); else startMic(); };
 
 // Vòng nhịp theo âm lượng (nếu được phép micro riêng)
 async function startMeter() {
@@ -877,7 +896,7 @@ function toast(msg, act, fn) {
 }
 
 // Điện thoại hay giữ bản cũ trong bộ nhớ đệm → hỏi máy chủ, có bản mới thì tải lại 1 lần
-const VER = '1';
+const VER = '2';
 $('#verLine').textContent = 'bản ' + VER;
 fetch('./?nocache=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
   const m = t.match(/const VER = '(\d+)'/);
