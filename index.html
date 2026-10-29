@@ -818,24 +818,41 @@ async function startRec() {
     if (now - t0 < 250) return;
     $('#lv').style.setProperty('--lv', 1 + Math.min(.6, rms * 6));
     if (rms > thr) { heard = true; quiet = 0; loud[loud.length - 1] = 1; }
-    else if (heard) { quiet ||= now; if (now - quiet > 1200) stop(); }   // im 1,2 giây là chốt
+    else if (heard) { quiet ||= now; if (now - quiet > 850) stop(); }   // im 0,85 giây là chốt
     if (now - t0 > 15000 || (!heard && now - t0 > 7000)) stop();
   };
   src.connect(proc); proc.connect(ac.destination);
   recSt = { stop };
   listening = true; mic.classList.add('on'); setLive('Đang nghe…'); if (navigator.vibrate) navigator.vibrate(15);
 }
+// Máy nghe hay nghe nhầm vài chữ quen → sửa lại trước khi tách (chỉ áp cho chữ từ máy nghe)
+const FIXES = [
+  [/(?<!\p{L})đổ (sang|săng|xang|xăn)(?!\p{L})/giu, 'đổ xăng'], [/(?<!\p{L})(tiền|đi|mua) săng(?!\p{L})/giu, '$1 xăng'],
+  [/(?<!\p{L})(kho the|sô pi|xô pi|shop pi|sốp pi|sốp bi|shoppe|sóp pi|shopy|shop pee)(?!\p{L})/giu, 'Shopee'],
+  [/(?<!\p{L})(gờ ráp|gráp|ráp bai)(?!\p{L})/giu, 'Grab'], [/(?<!\p{L})(la za đa|lazađa)(?!\p{L})/giu, 'Lazada'], [/(?<!\p{L})(ti ki)(?!\p{L})/giu, 'Tiki'],
+  [/(?<!\p{L})(cà phe|ca phê|cafe|cà fê)(?!\p{L})/giu, 'cà phê'], [/(?<!\p{L})(phỡ|phớ)(?!\p{L})/giu, 'phở'],
+  [/(?<!\p{L})(cho|nợ|trả|vay|mượn|của) chỉ(?!\p{L})/giu, '$1 chị'], [/^chỉ (?=\S+ (trả|nợ|mượn))/iu, 'chị '],
+  [/(?<!\p{L})(nghìn|ngàn) đồng(?!\p{L})/giu, '$1'],
+  [/^((?:[Vv]ừa|[Mm]ới|[Tt]ôi|[Mm]ình|[Hh]ôm qua)\s+)?[Nn](ở|ọ|ờ|ỡ|ớ)(?=\s+([Aa]nh|[Cc]hị|[Ee]m|[Cc]ô|[Cc]hú|[Bb]ác|[Bb]ạn|[Ôô]ng|[Bb]à|\p{Lu}))/u, '$1nợ'],
+];
+const fixHeard = t => FIXES.reduce((x, [re, to]) => x.replace(re, to), t);
+
 async function sendAudio(blob) {
   setLive('<span class="dots">Đang nhận dạng</span>'); mic.classList.add('think');
   try {
-    const r = await fetch(STT_URL, { method: 'POST', headers: { 'Content-Type': 'audio/wav' }, body: blob });
-    const j = await r.json().catch(() => ({}));
+    // Máy chủ Cloudflare thỉnh thoảng báo bận (hết bộ nhớ GPU) → tự gửi lại 1 lần
+    let r, j = {};
+    for (let k = 0; k < 2; k++) {
+      r = await fetch(STT_URL + '?p=1', { method: 'POST', headers: { 'Content-Type': 'audio/wav' }, body: blob });
+      j = await r.json().catch(() => ({}));
+      if (r.ok || r.status < 500) break;
+    }
     let t = (j.text || '').trim();
     // Whisper hay bịa các câu này khi tiếng nhỏ hoặc ồn → coi như chưa nghe rõ
     if (/Ghi chi tiêu bằng tiếng Việt|cảm ơn các bạn đã (theo dõi|xem)|hẹn gặp lại các bạn|đăng ký kênh|subscribe|like và share|Ghiền Mì Gõ/i.test(t)) t = '';
     if (!r.ok || !t) { setLive(j.error ? 'Máy nghe lỗi: ' + esc(j.error) + ' — chạm 🎤 trên bàn phím để nói.' : 'Chưa nghe rõ, bấm nói lại nhé.', true); return; }
     mic.classList.remove('think');
-    handleText([t]);
+    handleText([fixHeard(t)]);
   } catch (e) { setLive('Không gửi được tiếng nói (mạng?) — chạm <b>🎤 trên bàn phím</b> để nói.', true); }
   finally { mic.classList.remove('think'); }
 }
@@ -1443,7 +1460,7 @@ function toast(msg, act, fn) {
 }
 
 // Điện thoại hay giữ bản cũ trong bộ nhớ đệm → hỏi máy chủ, có bản mới thì tải lại 1 lần
-const VER = '10';
+const VER = '11';
 $('#verLine').textContent = 'bản ' + VER;
 fetch('./?nocache=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
   const m = t.match(/const VER = '(\d+)'/);
