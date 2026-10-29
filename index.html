@@ -182,6 +182,34 @@
   .menu button.item small { display:block; color:var(--dim); font-weight:400; font-size:12.5px; }
   .menu .ico { font-size:20px; width:28px; text-align:center; }
 
+  /* Tab Chi tiêu / Sổ nợ */
+  .tabs { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:5px; border-radius:17px; background:var(--glass); border:1px solid var(--line); margin-bottom:14px; }
+  .tabs button { height:42px; border-radius:13px; font-weight:700; font-size:15px; color:var(--mute); display:flex; align-items:center; justify-content:center; gap:7px; transition:background .2s, color .2s; }
+  .tabs button.on { background:var(--glass2); color:var(--text); }
+  .tabs .bd { min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:#ff5f7e; color:#fff; font-size:11.5px; display:inline-grid; place-items:center; }
+  .tabs .bd:empty { display:none; }
+  @media (min-width:900px) { .tabs { max-width:400px; } }
+  body.tab-no .chi-only, body:not(.tab-no) .no-only { display:none !important; }
+  .hero2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .hero2 > div { padding:14px 16px; }
+  .hero2 .lbl { color:var(--mute); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+  .hero2 .v { font-size:22px; font-weight:800; letter-spacing:-.02em; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .owe { color:#ff8fa3; } .owed { color:var(--a1); }
+  .pcard { display:flex; align-items:center; gap:12px; padding:12px 14px; width:100%; text-align:left; margin-bottom:10px; }
+  .avatar { width:42px; height:42px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:16px; flex:none; color:#07080c; }
+  .pcard .meta { flex:1; min-width:0; }
+  .pcard .nm { font-weight:700; font-size:15.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pcard .sub { font-size:12.5px; color:var(--mute); }
+  .pcard .amt { font-weight:800; font-variant-numeric:tabular-nums; text-align:right; }
+  .pcard .amt small { display:block; font-size:11.5px; font-weight:600; color:var(--dim); }
+  .pcard.done { opacity:.5; }
+  .hist { display:grid; gap:2px; margin:6px 0 4px; }
+  .hrow { display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px solid var(--line); font-size:14px; }
+  .hrow .k { flex:1; min-width:0; }
+  .hrow .k small { display:block; color:var(--dim); font-size:12px; }
+  .hrow .a { font-weight:700; font-variant-numeric:tabular-nums; }
+  .hrow .x { width:30px; height:30px; border-radius:9px; color:var(--dim); font-size:15px; }
+  .pbal { font-size:26px; font-weight:800; letter-spacing:-.02em; margin:0 0 4px; }
   .toast { position:fixed; left:50%; bottom:max(24px, env(safe-area-inset-bottom)); transform:translate(-50%, 140%); background:#1b1e27; border:1px solid var(--line);
            padding:11px 16px; border-radius:14px; font-size:14px; z-index:30; transition:transform .3s cubic-bezier(.2,.8,.2,1); white-space:nowrap; box-shadow:0 10px 30px rgba(0,0,0,.5); visibility:hidden; }
   .toast.on { transform:translate(-50%, 0); visibility:visible; }
@@ -198,9 +226,11 @@
     <button class="icbtn" id="menuBtn" aria-label="Tuỳ chọn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
   </header>
 
+  <div class="tabs" id="tabs"><button data-t="chi" class="on">💸 Chi tiêu</button><button data-t="no">🤝 Sổ nợ <span class="bd" id="noBadge"></span></button></div>
   <div class="grid">
     <section class="left">
-      <div class="glass hero">
+      <div class="hero2 no-only"><div class="glass"><div class="lbl">Mình đang nợ</div><div class="v owe" id="oweTotal">0đ</div></div><div class="glass"><div class="lbl">Người ta nợ mình</div><div class="v owed" id="owedTotal">0đ</div></div></div>
+      <div class="glass hero chi-only">
         <div><div class="lbl">Hôm nay</div><div class="big" id="todayTotal">0</div></div>
         <div class="side">Tháng này<b id="monthTotal">0</b></div>
       </div>
@@ -220,6 +250,8 @@
     </section>
 
     <section class="right">
+      <div class="no-only" id="viewNo"></div>
+      <div class="chi-only">
       <div class="seg" id="seg">
         <button data-v="day">Ngày</button><button data-v="week">Tuần</button><button data-v="month" class="on">Tháng</button><button data-v="year">Năm</button>
       </div>
@@ -234,6 +266,7 @@
       <div class="glass card bars" id="barsCard"><div class="h3" id="barsTitle">Theo ngày</div><svg id="bars"></svg></div>
       <div class="glass card" id="catCard"><div class="h3">Theo nhóm</div><div class="donut"><svg id="donut" viewBox="0 0 160 160"></svg><div class="legend" id="legend"></div></div></div>
       <div id="list"></div>
+      </div>
     </section>
   </div>
   <footer><span id="countLine"></span>·<span>Dữ liệu chỉ lưu trên máy này</span>·<span id="verLine"></span></footer>
@@ -256,8 +289,19 @@
   <button class="item" id="mCsv"><span class="ico">⬇️</span><span>Xuất CSV<small>Mở được bằng Excel / Google Sheets</small></span></button>
   <button class="item" id="mImp"><span class="ico">⬆️</span><span>Nhập lại từ CSV<small>Dùng file đã xuất từ app này (chuyển máy)</small></span></button>
   <button class="item" id="mNew"><span class="ico">✍️</span><span>Thêm tay<small>Tự điền số tiền, nhóm, ngày</small></span></button>
+  <button class="item" id="mCsvNo"><span class="ico">🤝</span><span>Xuất CSV sổ nợ<small>Ai nợ ai, từng lần vay/trả</small></span></button>
   <input type="file" id="impFile" accept=".csv,text/csv" hidden>
   <div class="acts"><button class="btn ghost" id="mClose" style="flex:1">Đóng</button></div>
+</div>
+<div class="sheet" id="psheet">
+  <div class="grab"></div>
+  <h2 id="pName"></h2>
+  <div class="pbal" id="pBal"></div>
+  <div class="heard" id="pSub"></div>
+  <div class="fld" style="margin-top:12px"><label for="pAmt">Ghi thêm cho người này</label><input id="pAmt" placeholder="Số tiền, ví dụ 200k"><div class="hint" id="pAmtHint"></div></div>
+  <div class="acts" style="margin-top:0" id="pActs"></div>
+  <div class="hist" id="pHist"></div>
+  <div class="acts"><button class="btn ghost" id="pClose" style="flex:1">Đóng</button></div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -506,7 +550,9 @@ const VN = (() => {
     });
     // Món sau không rõ nhóm thì theo món trước ("ăn sáng 30k, trưa 50k")
     for (let k = 1; k < items.length; k++) if (items[k].cat === 'khac') items[k].cat = items[k - 1].cat;
-    return { heard, date: ymd(date), items };
+    const used = new Set(chosen.flatMap(r => range(r.start, r.end)));
+    const rest = ow.filter((w, i) => !used.has(i) && w !== ',').join(' ');
+    return { heard, date: ymd(date), items, rest };
   }
 
   // Ô sửa số tiền: "50k", "1tr2", "2 trăm rưỡi", "120000"
@@ -515,7 +561,44 @@ const VN = (() => {
     return r ? r.amount : 0;
   }
 
-  return { parse, amountOnly, guessCat, learnKey, CATS, ymd, strip };
+  // ---- Sổ nợ ----
+  // vay: mình nợ người ta · tra: mình trả bớt · chovay: người ta nợ mình · thu: người ta trả mình
+  const ME = '(?:mình|tôi|tui|tao|tớ)';
+  const DEBT_RULES = [
+    [new RegExp('^(?:' + ME + '\\s+)?cho\\s+(.+?)\\s+(?:vay|mượn)(?:\\s|$)', 'iu'), 'chovay'],   // cho Hùng vay 1 triệu
+    [new RegExp('^(.+?)\\s+cho\\s+(?:' + ME + '\\s+)?(?:vay|mượn)(?:\\s|$)', 'iu'), 'vay'],     // Hùng cho mình vay 2 triệu
+    [new RegExp('^(?:' + ME + '\\s+)?trả\\s+(?:(?:nợ|lại|tiền|cho)\\s+)*(.+)$', 'iu'), 'tra'],   // trả nợ anh Hùng 200k
+    [new RegExp('^(.+?)\\s+trả(?:\\s|$)', 'iu'), 'thu'],                                         // anh Hùng trả 200k
+    [new RegExp('^(?:' + ME + '\\s+)?(?:nợ|vay|mượn|thiếu)\\s+(?:(?:của|tiền)\\s+)*(.+)$', 'iu'), 'vay'], // nợ anh Hùng 500k
+    [new RegExp('^(.+?)\\s+(?:nợ|thiếu|vay|mượn)(?:\\s|$)', 'iu'), 'chovay'],                   // Hùng nợ mình 300k
+  ];
+  const NAME_DROP = new Set('tiền nợ lại nhé nha rồi mình tôi tui tao tớ hết đó ạ vay mượn của cho thiếu trả là'.split(' '));
+  function cleanName(s) {
+    const w = s.split(/\s+/).filter(Boolean);
+    while (w.length && NAME_DROP.has(w[0].toLowerCase())) w.shift();
+    while (w.length && NAME_DROP.has(w[w.length - 1].toLowerCase())) w.pop();
+    return w.map(x => x[0].toUpperCase() + x.slice(1)).join(' ');
+  }
+  function parseDebt(text, opt = {}) {
+    const p = parse(text, opt);
+    if (!p.items.length) return null;
+    const R = p.rest.replace(/\s+/g, ' ').trim().replace(/^((vừa|mới|đã|đang|ghi|là|thì)\s+)+/iu, '');
+    const lo = ' ' + R.toLowerCase() + ' ';
+    const debtWord = /\s(nợ|vay|mượn|thiếu)\s/u.test(lo);
+    const known = (opt.people || []).some(k => k && lo.includes(' ' + k.toLowerCase() + ' '));
+    if (!debtWord && !(/\strả\s/u.test(lo) && (/\slại\s/u.test(lo) || known))) return null;
+    const base = { amount: p.items[0].amount, date: p.date, heard: p.heard };
+    for (const [re, kind] of DEBT_RULES) {
+      const m = R.match(re);
+      if (!m) continue;
+      const who = cleanName(m[1]);
+      if (!who || new RegExp('^' + ME + '$', 'iu').test(who)) continue;
+      return { ...base, kind, person: who };
+    }
+    return { ...base, kind: 'vay', person: 'Không rõ' };
+  }
+
+  return { parse, parseDebt, amountOnly, guessCat, learnKey, CATS, ymd, strip };
 })();
 // ===== (PARSER-END) =====
 
@@ -618,11 +701,24 @@ function stopMeter() { if (!meter) return; cancelAnimationFrame(meter.raf); mete
 
 // ===== XỬ LÝ CÂU =====
 function handleText(alts, typed) {
+  // Câu nói về nợ → sổ nợ riêng, không tính vào chi tiêu
+  for (const a of alts) {
+    const d = VN.parseDebt(a, { people: people() });
+    if (!d) continue;
+    const x = { id: uid(), kind: d.kind, person: d.person, amt: d.amount, date: d.date, ts: Date.now(), heard: d.heard };
+    debts.push(x); saveDebts();
+    setTab('no');
+    setLive((typed ? 'Đã ghi vào sổ nợ: ' : 'Nghe được: ') + '<b>“' + esc(d.heard) + '”</b>');
+    showAdded([x]);
+    if (navigator.vibrate) navigator.vibrate([10, 40, 10]);
+    return;
+  }
   // Lấy câu nghe được đầu tiên có số tiền
   let res = null;
   for (const a of alts) { const r = VN.parse(a, { learned }); if (r.items.length) { res = r; break; } }
   if (!res) { setLive('Nghe được: <b>“' + esc(alts[0]) + '”</b> — chưa thấy số tiền. Nói lại kèm số tiền, ví dụ “phở 50 nghìn”.', true); return; }
   const added = addEntries(res);
+  setTab('chi');
   setLive((typed ? 'Đã ghi: ' : 'Nghe được: ') + '<b>“' + esc(res.heard) + '”</b>');
   showAdded(added);
   render();
@@ -636,8 +732,9 @@ $('#typeForm').onsubmit = e => {
   $('#typed').value = '';
   $('#typed').blur();
 };
-const TRY = ['vừa ăn phở 50 nghìn', 'đổ xăng 80k', 'mua đồ Shopee 2 trăm rưỡi', 'cà phê năm chục', 'tiền nhà 1 triệu 2', 'hôm qua đi grab 45 nghìn'];
-$('#tryChips').innerHTML = TRY.map(t => `<button class="chip">${esc(t)}</button>`).join('');
+const TRY = { chi: ['vừa ăn phở 50 nghìn', 'đổ xăng 80k', 'mua đồ Shopee 2 trăm rưỡi', 'cà phê năm chục', 'tiền nhà 1 triệu 2', 'hôm qua đi grab 45 nghìn'],
+  no: ['nợ anh Hùng 500k', 'cho chị Lan vay 2 triệu', 'trả nợ anh Hùng 200k', 'chị Lan trả 1 triệu', 'Tuấn nợ mình 300k'] };
+const paintTry = () => { $('#tryChips').innerHTML = TRY[tab].map(t => `<button class="chip">${esc(t)}</button>`).join(''); $('#typed').placeholder = tab === 'no' ? 'Hoặc gõ: nợ anh Hùng 500k' : 'Hoặc gõ: đổ xăng 80k'; };
 $('#tryChips').onclick = e => { const b = e.target.closest('.chip'); if (b) { $('#typed').value = b.textContent; $('#typed').focus(); } };
 
 function dateLabel(s) {
@@ -649,6 +746,10 @@ function dateLabel(s) {
 }
 function showAdded(list) {
   $('#added').innerHTML = list.map(x => {
+    if (x.kind) return `<div class="glass addcard" data-debt="${x.id}">
+      <div class="badge" style="background:${DK[x.kind].c}22">${DK[x.kind].ic}</div>
+      <div class="meta"><div class="amt ${DK[x.kind].cls}">${fmt(x.amt)}</div><div class="nt">${esc(DK[x.kind].say(x.person))} · ${dateLabel(x.date)}</div></div>
+      <div class="acts"><button data-a="edit">Xem</button><button data-a="undo">Huỷ</button></div></div>`;
     const c = CAT[x.cat];
     return `<div class="glass addcard" data-id="${x.id}">
       <div class="badge" style="background:${c.c}22">${c.ic}</div>
@@ -659,6 +760,12 @@ function showAdded(list) {
 $('#added').onclick = e => {
   const b = e.target.closest('button'), card = e.target.closest('.addcard');
   if (!b || !card) return;
+  if (card.dataset.debt) {
+    const x = debts.find(y => y.id === card.dataset.debt);
+    if (b.dataset.a === 'undo') { debts = debts.filter(y => y !== x); saveDebts(); card.remove(); toast('Đã huỷ khoản nợ vừa ghi'); }
+    else if (x) openPerson(x.person);
+    return;
+  }
   const id = card.dataset.id;
   if (b.dataset.a === 'undo') { db = db.filter(x => x.id !== id); save(); card.remove(); render(); toast('Đã huỷ khoản vừa ghi'); }
   else openEdit(id);
@@ -887,6 +994,94 @@ $('#impFile').onchange = async e => {
   toast(n ? `Đã nhập ${n} khoản` : 'Không có khoản mới');
 };
 
+// ===== SỔ NỢ =====
+let debts = load('chitieu.no', []);
+const saveDebts = () => { try { localStorage.setItem('chitieu.no', JSON.stringify(debts)); } catch {} renderDebts(); };
+// sign: + là người ta nợ mình, − là mình nợ người ta
+const DK = {
+  vay:    { ic: '🫴', c: '#ff8fa3', cls: 'owe',  sign: -1, lb: 'Mình vay',          say: p => 'Mình nợ ' + p },
+  tra:    { ic: '↩️', c: '#34d399', cls: '',     sign: +1, lb: 'Mình trả',          say: p => 'Mình trả ' + p },
+  chovay: { ic: '🤝', c: '#34d399', cls: 'owed', sign: +1, lb: 'Cho vay',           say: p => p + ' nợ mình' },
+  thu:    { ic: '💰', c: '#facc15', cls: '',     sign: -1, lb: 'Người ta trả',      say: p => p + ' trả mình' },
+};
+const pkey = p => VN.strip(p).trim();
+const people = () => [...new Set(debts.map(x => x.person))];
+function balances() {
+  const m = {};
+  debts.forEach(x => { const k = pkey(x.person); (m[k] = m[k] || { name: x.person, bal: 0, last: 0, n: 0 }); m[k].bal += DK[x.kind].sign * x.amt; m[k].last = Math.max(m[k].last, x.ts); m[k].n++; m[k].name = x.person; });
+  return Object.values(m).sort((a, b) => (Math.abs(b.bal) > 0) - (Math.abs(a.bal) > 0) || b.last - a.last);
+}
+const AV = ['#34d399', '#22d3ee', '#a78bfa', '#f472b6', '#facc15', '#fb923c', '#60a5fa'];
+const avColor = n => AV[[...pkey(n)].reduce((t, c) => t + c.charCodeAt(0), 0) % AV.length];
+function renderDebts() {
+  const bs = balances();
+  const owe = bs.filter(b => b.bal < 0).reduce((t, b) => t - b.bal, 0), owed = bs.filter(b => b.bal > 0).reduce((t, b) => t + b.bal, 0);
+  $('#oweTotal').textContent = fmtT(owe); $('#owedTotal').textContent = fmtT(owed);
+  $('#noBadge').textContent = bs.filter(b => b.bal !== 0).length || '';
+  if (!bs.length) { $('#viewNo').innerHTML = `<div class="glass empty">Chưa có khoản nợ nào.<br>Nói thử “nợ anh Hùng 500 nghìn” hoặc “cho chị Lan vay 2 triệu”.<br><br><small>Câu có chữ <b>nợ, vay, mượn, trả nợ</b> sẽ tự vào đây, không tính vào chi tiêu.</small></div>`; return; }
+  const sec = (title, arr) => arr.length ? `<div class="dayh" style="margin-top:4px"><span>${title}</span><span>${arr.length} người</span></div>` + arr.map(b => `
+    <button class="glass pcard ${b.bal === 0 ? 'done' : ''}" data-p="${esc(b.name)}">
+      <div class="avatar" style="background:${avColor(b.name)}">${esc(b.name[0] || '?')}</div>
+      <div class="meta"><div class="nm">${esc(b.name)}</div><div class="sub">${b.n} lần ghi · ${dateLabel(VN.ymd(new Date(b.last)))}</div></div>
+      <div class="amt ${b.bal < 0 ? 'owe' : b.bal > 0 ? 'owed' : ''}">${b.bal === 0 ? 'Xong' : fmtT(Math.abs(b.bal))}<small>${b.bal < 0 ? 'mình nợ' : b.bal > 0 ? 'nợ mình' : 'đã trả hết'}</small></div>
+    </button>`).join('') : '';
+  $('#viewNo').innerHTML = sec('Mình đang nợ', bs.filter(b => b.bal < 0)) + sec('Người ta nợ mình', bs.filter(b => b.bal > 0)) + sec('Đã xong', bs.filter(b => b.bal === 0));
+}
+$('#viewNo').onclick = e => { const b = e.target.closest('.pcard'); if (b) openPerson(b.dataset.p); };
+
+let curP = null;
+function openPerson(name) {
+  curP = name;
+  const k = pkey(name), xs = debts.filter(x => pkey(x.person) === k).sort((a, b) => b.date.localeCompare(a.date) || b.ts - a.ts);
+  const bal = xs.reduce((t, x) => t + DK[x.kind].sign * x.amt, 0);
+  $('#pName').textContent = name;
+  $('#pBal').innerHTML = bal === 0 ? 'Đã trả hết' : `<span class="${bal < 0 ? 'owe' : 'owed'}">${fmtT(Math.abs(bal))}</span>`;
+  $('#pSub').textContent = bal < 0 ? 'Mình đang nợ ' + name : bal > 0 ? name + ' đang nợ mình' : 'Không còn nợ nhau';
+  const acts = bal < 0 ? [['tra', 'Mình trả bớt'], ['vay', 'Vay thêm']] : bal > 0 ? [['thu', name + ' trả bớt'], ['chovay', 'Cho vay thêm']] : [['vay', 'Mình vay'], ['chovay', 'Cho vay']];
+  $('#pActs').innerHTML = acts.map(([k, l], i) => `<button class="btn ${i ? 'ghost' : 'main'}" data-k="${k}" style="flex:1">${esc(l)}</button>`).join('')
+    + (bal !== 0 ? `<button class="btn ghost" data-k="all" title="Ghi trả hết">Trả hết</button>` : '');
+  $('#pHist').innerHTML = xs.map(x => `<div class="hrow"><span>${DK[x.kind].ic}</span><div class="k">${DK[x.kind].lb}<small>${dateLabel(x.date)}${x.heard ? ' · “' + esc(x.heard) + '”' : ''}</small></div><div class="a ${DK[x.kind].sign < 0 ? 'owe' : 'owed'}">${DK[x.kind].sign < 0 ? '−' : '+'}${fmtT(x.amt)}</div><button class="x" data-id="${x.id}" aria-label="Xoá">✕</button></div>`).join('');
+  $('#pAmt').value = ''; $('#pAmtHint').textContent = '';
+  if (!$('#psheet').classList.contains('on')) openSheet($('#psheet'));
+}
+$('#pAmt').oninput = () => { const v = VN.amountOnly($('#pAmt').value); $('#pAmtHint').textContent = $('#pAmt').value.trim() ? (v ? '= ' + fmtT(v) : 'Chưa hiểu số tiền') : ''; };
+$('#pActs').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const k = pkey(curP), bal = debts.filter(x => pkey(x.person) === k).reduce((t, x) => t + DK[x.kind].sign * x.amt, 0);
+  let kind = b.dataset.k, amt = VN.amountOnly($('#pAmt').value);
+  if (kind === 'all') { kind = bal < 0 ? 'tra' : 'thu'; amt = Math.abs(bal); }
+  if (!amt) { $('#pAmt').focus(); $('#pAmtHint').textContent = 'Nhập số tiền trước, ví dụ 200k'; return; }
+  debts.push({ id: uid(), kind, person: curP, amt, date: today(), ts: Date.now(), heard: '' });
+  saveDebts(); openPerson(curP); toast('Đã ghi');
+};
+$('#pHist').onclick = e => {
+  const b = e.target.closest('.x'); if (!b) return;
+  const x = debts.find(y => y.id === b.dataset.id); if (!x) return;
+  debts = debts.filter(y => y !== x); saveDebts();
+  if (debts.some(y => pkey(y.person) === pkey(curP))) openPerson(curP); else closeSheets();
+  toast('Đã xoá', 'Hoàn tác', () => { debts.push(x); saveDebts(); });
+};
+$('#pClose').onclick = closeSheets;
+$('#mCsvNo').onclick = () => {
+  const head = ['Ngày', 'Người', 'Loại', 'Số tiền', 'Câu nói'];
+  const rows = debts.slice().sort((a, b) => a.date.localeCompare(b.date) || a.ts - b.ts).map(x => [x.date, x.person, DK[x.kind].lb, DK[x.kind].sign * x.amt, x.heard || '']);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + [head, ...rows].map(r => r.map(csvCell).join(',')).join('\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = `so-no-${today()}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  closeSheets(); toast('Đã xuất ' + debts.length + ' dòng sổ nợ');
+};
+
+// ===== TAB =====
+let tab = load('chitieu.tab', 'chi');
+function setTab(t) {
+  tab = t;
+  document.body.classList.toggle('tab-no', t === 'no');
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  try { localStorage.setItem('chitieu.tab', JSON.stringify(t)); } catch {}
+  paintTry();
+}
+$('#tabs').onclick = e => { const b = e.target.closest('button'); if (b && b.dataset.t !== tab) { setTab(b.dataset.t); $('#added').innerHTML = ''; } };
+
 let tT;
 function toast(msg, act, fn) {
   const t = $('#toast');
@@ -896,7 +1091,7 @@ function toast(msg, act, fn) {
 }
 
 // Điện thoại hay giữ bản cũ trong bộ nhớ đệm → hỏi máy chủ, có bản mới thì tải lại 1 lần
-const VER = '2';
+const VER = '3';
 $('#verLine').textContent = 'bản ' + VER;
 fetch('./?nocache=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
   const m = t.match(/const VER = '(\d+)'/);
@@ -907,6 +1102,8 @@ fetch('./?nocache=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).the
 }).catch(() => {});
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 
+setTab(tab);
+renderDebts();
 render();
 </script>
 </body>
